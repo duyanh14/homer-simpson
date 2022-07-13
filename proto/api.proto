@@ -1,0 +1,44 @@
+syntax = "proto3";
+option go_package = ".;proto";
+package proto;
+
+import "google/api/annotations.proto";
+
+service API {
+
+  // rpc Readness(EmptyRequestResponse) returns (EmptyRequestResponse) {
+  //     option (google.api.http) = {
+  //       get: "/v1/readness"
+  //     };
+  //   }
+
+  // rpc Liveness(EmptyRequestResponse) returns (EmptyRequestResponse) {
+  //     option (google.api.http) = {
+  //       get: "/v1/liveness"
+  //     };
+  //   }
+
+
+    rpc Login(LoginRequest) returns (LoginResponse) {
+      option (google.api.http) = {
+        post: "/v1/simpson/login"
+        body: "*"
+      };
+    }
+  }
+
+message EmptyRequestResponse {
+}
+
+
+message LoginRequest {
+  string username = 1;
+  string password = 2;
+}
+
+message LoginResponse {
+  string status_code = 1;
+  string reason_code = 2;
+  string reason_message = 3;
+  string jwt = 4;
+}
