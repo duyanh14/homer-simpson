@@ -2,7 +2,6 @@ package config
 
 import (
 	"bytes"
-	"fmt"
 	"strings"
 
 	"github.com/spf13/viper"
@@ -14,11 +13,11 @@ db_migration_data: false
 cors_local: true
 http_address: 8080
 postgres:
-  username: sql6501022
-  password: szkJpYD8aq
-  database: sql6501022
-  host: sql6.freemysqlhosting.net
-  port: 3306
+  username: postgres
+  password: postgres
+  database: postgres
+  host: localhost
+  port: 5432
 admin_dev:
   - ducnp
   - dev
@@ -94,15 +93,19 @@ type (
 	}
 
 	Redis struct {
-		Addrs    []string
-		Password string `yaml:"password" mapstructure:"password"`
-		Database int    `yaml:"database" mapstructure:"database"`
+		Addrs               []string
+		Password            string `yaml:"password" mapstructure:"password"`
+		Database            int    `yaml:"database" mapstructure:"database"`
+		PoolSize            int    `yaml:"pool_size" mapstructure:"pool_size"`
+		DialTimeoutSeconds  int    `yaml:"dial_timeout_seconds" mapstructure:"dial_timeout_seconds"`
+		ReadTimeoutSeconds  int    `yaml:"read_timeout_seconds" mapstructure:"read_timeout_seconds"`
+		WriteTimeoutSeconds int    `yaml:"write_timeout_seconds" mapstructure:"write_timeout_seconds"`
+		IdleTimeoutSeconds  int    `yaml:"idle_timeout_seconds" mapstructure:"idle_timeout_seconds"`
 	}
 )
 
 // LoadConfig is func load config for app
 func LoadConfig() (*Config, error) {
-	fmt.Println("di - new config")
 	var conf = &Config{}
 	viper.SetConfigType("yaml")
 	err := viper.ReadConfig(bytes.NewBuffer(yamlConfig))

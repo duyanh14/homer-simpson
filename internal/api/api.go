@@ -1,32 +1,18 @@
 package api
 
-// import (
-// 	"context"
-// )
+import "github.com/gin-gonic/gin"
 
-// type api struct {
-// }
+func (h *userRouter) UserRouter(router *gin.RouterGroup) {
+	router.GET("/user/register", h.register())
+	router.GET("/user/login", h.login())
+}
 
-// func NewApi() proto.APIServer {
-// 	return &api{}
-// }
+func (h *roleRouter) RoleRouter(router *gin.RouterGroup) {
+	router.DELETE("/role", h.deleteRole())
+	router.POST("/role", h.addRole())
+}
 
-// func (a *api) Login(ctx context.Context, req *proto.LoginRequest) (resp *proto.LoginResponse, err error) {
-// 	return &proto.LoginResponse{
-// 		StatusCode:    "ACCPET",
-// 		ReasonCode:    "",
-// 		ReasonMessage: "",
-// 		Jwt:           "jwt ...",
-// 	}, nil
-// }
-
-// func (a *api) Liveness(ctx context.Context, req *proto.EmptyRequestResponse) (resp *proto.EmptyRequestResponse, err error) {
-// 	return &proto.EmptyRequestResponse{}, nil
-// }
-
-// func (a *api) Readness(ctx context.Context, req *proto.EmptyRequestResponse) (resp *proto.EmptyRequestResponse, err error) {
-// 	return &proto.EmptyRequestResponse{}, nil
-// }
-
-// func (a *api) mustEmbedUnimplementedAPIServer() {
-// }
+func (h *permissionRouter) PermissionRouter(router *gin.RouterGroup) {
+	router.POST("/permission", h.addPermission())
+	router.DELETE("/permission", h.deletePermission())
+}

@@ -1,6 +1,6 @@
 version: "3.7"
 volumes:
-  postgresdata:
+  postgredata:
     external: false
 services:
     # redis:
@@ -9,13 +9,13 @@ services:
     #   ports:
     #     - 6379:6379
     
-    postgress:
+    postgres:
         image: postgres:11.3-alpine
         restart: always
         environment:
-          - POSTGRES_PASSWORD=postgress
-          - POSTGRES_DB=postgress
+          - POSTGexxRES_PASSWORD=postgres
+          - POSTGRES_DB=postgres
         ports:
           - 5432:5432
         volumes:
-          - postgresdata:/var/lib/postgresql/data
+          - postgredata:/var/lib/postgresql/data
