@@ -8,6 +8,7 @@ import (
 	"os"
 	"simpson/config"
 	"simpson/internal/api"
+	"simpson/internal/api/validation"
 	"simpson/internal/helper/cache"
 	"simpson/internal/helper/db"
 	"simpson/internal/repository"
@@ -108,8 +109,9 @@ func (s *Server) Router(usecase *usecase.Usecase) error {
 		return errors.New("router user nil")
 	}
 	router := s.router.Group("v1")
-	//router.Use(middleware.RateLimiter(s.rateLimiter))
-
+	// router.Use(middleware.RateLimiter(s.rateLimiter))
+	// router.Use(middleware)
+	validatorIn := validation.InitValidator()
 	//
 	userRouter := api.NewUserHandler(usecase.UserUsecase)
 	userRouter.UserRouter(router)
@@ -119,6 +121,9 @@ func (s *Server) Router(usecase *usecase.Usecase) error {
 
 	permissionRouter := api.NewPermissionHandler()
 	permissionRouter.PermissionRouter(router)
+
+	partnerRouter := api.NewPartnerHandler(usecase.PartnerUsecase, validatorIn)
+	partnerRouter.PartnerRouter(router)
 
 	return nil
 }

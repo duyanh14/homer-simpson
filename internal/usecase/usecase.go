@@ -7,7 +7,8 @@ import (
 )
 
 type Usecase struct {
-	UserUsecase UserUsecase
+	UserUsecase    UserUsecase
+	PartnerUsecase PartnerUsecase
 }
 
 func InitUsecase(ctx context.Context, repo repository.Repository) (*Usecase, error) {
@@ -15,6 +16,7 @@ func InitUsecase(ctx context.Context, repo repository.Repository) (*Usecase, err
 		return nil, errors.New("repo empty in usecase")
 	}
 	return &Usecase{
-		UserUsecase: NewUserUsecase(repo.NewUserRepo()),
+		UserUsecase:    NewUserUsecase(repo.NewUserRepo()),
+		PartnerUsecase: NewPartnerUsecase(repo.NewPartnerRepo()),
 	}, nil
 }
