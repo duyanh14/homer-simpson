@@ -4,8 +4,9 @@ import (
 	"fmt"
 	"os"
 	"simpson/config"
+	"strings"
 
-	"go.uber.org/fx"
+	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
 )
@@ -37,7 +38,9 @@ type ILogger interface {
 
 type logger struct {
 	sugarLogger *zap.SugaredLogger
-	*zap.Logger
+	logger      *zap.Logger
+	key         string
+	zapSugar    bool
 }
 
 var Logger *logger = &logger{}
@@ -47,29 +50,19 @@ func configure() zapcore.WriteSyncer {
 	return zapcore.NewMultiWriteSyncer(writers...)
 }
 
-// App Logger constructor
-func Newlogger(lifecycle fx.Lifecycle, config *config.Config, mode, level, format string) ILogger {
-	// lifecycle.Append(fx.Hook{
-	// 	OnStart: func(context.Context) error {
-	// 		return nil
-	// 	},
-	// 	OnStop: func(ctx context.Context) error {
-	// 		return nil
-	// 	},
-	// })
+func GetLogger() *logger {
+	return Logger
+}
 
-	fmt.Println("di-new logger")
-	// lifecycle.Append(fx.Hook{OnStart: func(context.Context) error {
-	// 	fmt.Println("config", config.Logger.Level)
-	// 	return nil
-	// }})
-	logLevel, exist := loggerLevelMap[level]
+// App Logger constructor
+func Newlogger(cfg config.Logger) ILogger {
+	logLevel, exist := loggerLevelMap[cfg.Level]
 	if !exist {
 		logLevel = zapcore.DebugLevel
 	}
 
 	var encoderCfg zapcore.EncoderConfig
-	if mode == "pro" {
+	if cfg.Mode == "pro" {
 		encoderCfg = zap.NewProductionEncoderConfig()
 	} else {
 		encoderCfg = zap.NewDevelopmentEncoderConfig()
@@ -82,43 +75,80 @@ func Newlogger(lifecycle fx.Lifecycle, config *config.Config, mode, level, forma
 	encoderCfg.MessageKey = "MESSAGE"
 	encoderCfg.EncodeDuration = zapcore.NanosDurationEncoder
 	encoderCfg.EncodeTime = zapcore.ISO8601TimeEncoder
-
+	encoderCfg.FunctionKey = "FUNC"
 	var encoder zapcore.Encoder
-	if format == "console" {
+	if cfg.Encoding == "console" {
 		encoder = zapcore.NewConsoleEncoder(encoderCfg)
 	} else {
 		encoder = zapcore.NewJSONEncoder(encoderCfg)
 	}
+
 	core := zapcore.NewCore(encoder, configure(), zap.NewAtomicLevelAt(logLevel))
 	loggerzap := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(0))
 	sugarLogger := loggerzap.Sugar()
-	// Logger := &logger{
-	// 	sugarLogger: sugarLogger,
-	// 	Logger:      loggerzap,
-	// }
-	// return *Logger
-	tempLog := &logger{
+
+	logging := &logger{
 		sugarLogger: sugarLogger,
-		Logger:      loggerzap,
+		logger:      loggerzap,
+		key:         uuid.NewString(),
+		zapSugar:    strings.Contains(cfg.ZapType, "sugar"),
 	}
-	Logger = tempLog
-	return tempLog
+
+	Logger = logging
+	return logging
+}
+
+func (l *logger) SetLogginID(key string) {
+	l.key = key
 }
 
 func (l *logger) Debug(args ...interface{}) {
-	l.sugarLogger.Debug(args...)
+	if l.zapSugar {
+		l.sugarLogger.Debug(args...)
+		return
+	}
+	str := fmt.Sprintf("%s", args...)
+	fields := []zapcore.Field{
+		zap.String("UUID", l.key),
+	}
+	l.logger.Debug(str, fields...)
 }
 
 func (l *logger) Debugf(template string, args ...interface{}) {
-	l.sugarLogger.Debugf(template, args...)
+	if l.zapSugar {
+		str := fmt.Sprintf("UUID:%s, %s", l.key, template)
+		l.sugarLogger.Debugf(str, args...)
+		return
+	}
+	str := fmt.Sprintf("%s", args...)
+	fields := []zapcore.Field{
+		zap.String("UUID", l.key),
+	}
+	l.logger.Debug(str, fields...)
 }
 
 func (l *logger) Info(args ...interface{}) {
-	l.sugarLogger.Info(args...)
+	if l.zapSugar {
+		l.sugarLogger.Info(args...)
+		return
+	}
+	str := fmt.Sprintf("%s", args...)
+	fields := []zapcore.Field{
+		zap.String("UUID", l.key),
+	}
+	l.logger.Info(str, fields...)
 }
 
 func (l *logger) Infof(template string, args ...interface{}) {
-	l.sugarLogger.Infof(template, args...)
+	if l.zapSugar {
+		str := fmt.Sprintf("UUID:%s, %s", l.key, template)
+		l.sugarLogger.Infof(str, args...)
+		return
+	}
+	fields := []zapcore.Field{
+		zap.String("UUID", l.key),
+	}
+	l.logger.Info(fmt.Sprintf(template, args...), fields...)
 }
 
 func (l *logger) Warn(args ...interface{}) {
@@ -130,11 +160,27 @@ func (l *logger) Warnf(template string, args ...interface{}) {
 }
 
 func (l *logger) Error(args ...interface{}) {
-	l.sugarLogger.Error(args...)
+	if l.zapSugar {
+		l.sugarLogger.Error(args...)
+		return
+	}
+	str := fmt.Sprintf("%s", args...)
+	fields := []zapcore.Field{
+		zap.String("UUID", l.key),
+	}
+	l.logger.Error(str, fields...)
 }
 
 func (l *logger) Errorf(template string, args ...interface{}) {
-	l.sugarLogger.Errorf(template, args...)
+	if l.zapSugar {
+		str := fmt.Sprintf("UUID:%s, %s", l.key, template)
+		l.sugarLogger.Errorf(str, args...)
+		return
+	}
+	fields := []zapcore.Field{
+		zap.String("UUID", l.key),
+	}
+	l.logger.Error(fmt.Sprintf(template, args...), fields...)
 }
 
 func (l *logger) DPanic(args ...interface{}) {

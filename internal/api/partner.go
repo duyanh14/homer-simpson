@@ -2,8 +2,9 @@ package api
 
 import (
 	"net/http"
-	"simpson/internal/common"
 	"simpson/internal/dto"
+	"simpson/internal/helper"
+	"simpson/internal/helper/logger"
 	"simpson/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -26,30 +27,41 @@ func NewPartnerHandler(
 }
 
 func (h *partnerRouter) addPartner() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
+	return helper.WithContext(func(ctx *helper.ContextGin) {
+
 		var (
 			req = dto.PartnerDTO{}
+			log = logger.GetLogger()
 		)
 		err := ctx.ShouldBindJSON(&req)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, nil)
+			log.Error("error while bind json %v", err)
+			ctx.BadRequest(err)
 			return
 		}
 		err = h.valida.Struct(req)
 		if err != nil {
-			ctx.JSON(http.StatusBadRequest, common.ResponseError(err))
+			log.Errorf("error while validator err %v", err)
+			ctx.BadRequest(err)
 			return
 		}
+		log.Info("start call api add partner")
 		if err := h.partnerUsecase.AddPartner(ctx, req); err != nil {
-			ctx.JSON(http.StatusOK, common.ResponseError(err))
+			log.Error("error %w", err)
+			ctx.BadLogic(err)
 			return
 		}
-		ctx.JSON(http.StatusOK, common.ResponseOK())
-	}
+		ctx.OKResponse(nil)
+	})
 }
 
 func (h *partnerRouter) deletePartner() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
+		log := logger.GetLogger()
+		log.Debug("delete partner")
+		log.Debug("delete partner 1 ")
+		log.Debug("delete partner 2")
+		log.Debug("delete partner 3")
 		ctx.JSON(http.StatusOK, abc{
 			Name: "ducnp",
 		})

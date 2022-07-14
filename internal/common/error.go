@@ -3,13 +3,13 @@ package common
 import "errors"
 
 var (
-	CommonError   = errors.New("common error")
-	DatabaseError = errors.New("database error")
+	ErrCommon   = errors.New("common error")
+	ErrDatabase = errors.New("database error")
 )
 
 var ErrorCodeValue = map[error]string{
-	CommonError:   "-1",
-	DatabaseError: "-2",
+	ErrCommon:   "-1",
+	ErrDatabase: "-2",
 }
 
 func ErrorMessage(err error) string {
@@ -19,7 +19,7 @@ func ErrorMessage(err error) string {
 func ErrorCode(err error) string {
 	code, ok := ErrorCodeValue[err]
 	if !ok {
-		return ""
+		return "400"
 	}
 	return code
 }

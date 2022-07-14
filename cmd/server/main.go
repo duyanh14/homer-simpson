@@ -11,7 +11,8 @@ import (
 	"simpson/internal/api/validation"
 	"simpson/internal/helper/cache"
 	"simpson/internal/helper/db"
-	"simpson/internal/repository"
+	"simpson/internal/helper/logger"
+	"simpson/internal/service"
 	"simpson/internal/usecase"
 
 	"github.com/gin-contrib/cors"
@@ -55,6 +56,9 @@ func (s *Server) Init(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
+
+	logger.Newlogger(cfg.Logger)
+
 	// init database postgres
 	dbPostgres, err := db.InitPostgres(cfg.Postgres)
 	if err != nil {
@@ -72,7 +76,7 @@ func (s *Server) Init(ctx context.Context) error {
 
 	s.initCors(ctx)
 
-	repo, err := repository.InitRepository(ctx, dbPostgres)
+	repo, err := service.InitService(ctx, dbPostgres)
 	if err != nil {
 		return err
 	}
@@ -86,7 +90,7 @@ func (s *Server) Init(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-
+	zap.L().Info("start server ok")
 	return nil
 }
 
@@ -109,7 +113,9 @@ func (s *Server) Router(usecase *usecase.Usecase) error {
 		return errors.New("router user nil")
 	}
 	router := s.router.Group("v1")
-	// router.Use(middleware.RateLimiter(s.rateLimiter))
+
+	// router.Use(helper.SetRequestID())
+
 	// router.Use(middleware)
 	validatorIn := validation.InitValidator()
 	//

@@ -44,6 +44,7 @@ logger:
   disable_stacktrace: false
   encoding: json
   level: debug
+  zap_type: null
 `)
 
 type (
@@ -66,6 +67,7 @@ type (
 		DisableStacktrace bool   `yaml:"disable_stacktrace" mapstructure:"disable_stacktrace"`
 		Encoding          string `yaml:"encoding" mapstructure:"encoding"`
 		Level             string `yaml:"level" mapstructure:"level"`
+		ZapType           string `yaml:"zap_type" mapstructure:"zap_type"`
 	}
 
 	Jwt struct {

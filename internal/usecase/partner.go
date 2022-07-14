@@ -2,13 +2,15 @@ package usecase
 
 import (
 	"context"
+	"simpson/internal/common"
 	"simpson/internal/dto"
-	"simpson/internal/repository"
-	"simpson/internal/repository/model"
+	"simpson/internal/helper/logger"
+	"simpson/internal/service"
+	"simpson/internal/service/model"
 )
 
 type partnerUsecase struct {
-	partnerRepo repository.PartnerRepo
+	partnerService service.PartnerService
 }
 
 type PartnerUsecase interface {
@@ -16,21 +18,21 @@ type PartnerUsecase interface {
 }
 
 func NewPartnerUsecase(
-	partnerRepo repository.PartnerRepo,
+	partnerService service.PartnerService,
 ) PartnerUsecase {
 	return &partnerUsecase{
-		partnerRepo: partnerRepo,
+		partnerService: partnerService,
 	}
 }
 
 func (u *partnerUsecase) AddPartner(ctx context.Context, req dto.PartnerDTO) error {
-	// if err := validator.AddPartnerValidator(req); err != nil {
-	// 	return err
-	// }
-	err := u.partnerRepo.AddPartner(ctx, model.Partner{})
+	var (
+		log = logger.GetLogger()
+	)
+	err := u.partnerService.AddPartner(ctx, model.Partner{})
 	if err != nil {
-		// TODO logging
-		//	return common.DatabaseError
+		log.Errorf("error while call database error %v", err)
+		return common.ErrDatabase
 	}
 	return nil
 }
