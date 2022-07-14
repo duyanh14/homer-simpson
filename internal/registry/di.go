@@ -52,7 +52,7 @@ func helperBuild() error {
 	return nil
 }
 
-func repositoryBuild() error {
+func serviceBuild() error {
 	return nil
 }
 
@@ -79,7 +79,7 @@ func BuildContainer(ctx context.Context) {
 			panic(err)
 		}
 
-		if err := repositoryBuild(); err != nil {
+		if err := serviceBuild(); err != nil {
 			panic(err)
 		}
 

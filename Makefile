@@ -14,7 +14,7 @@ folder: ## create folder in project
 	@mkdir -p internal/dto
 	@mkdir -p internal/helper
 	@mkdir -p internal/registry
-	@mkdir -p internal/repository
+	@mkdir -p internal/service
 	@mkdir -p internal/usecase
 	@mkdir -p internal/utils
 	@mkdir -p thirdparty

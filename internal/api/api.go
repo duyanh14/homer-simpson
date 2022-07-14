@@ -16,3 +16,11 @@ func (h *permissionRouter) PermissionRouter(router *gin.RouterGroup) {
 	router.POST("/permission", h.addPermission())
 	router.DELETE("/permission", h.deletePermission())
 }
+
+func (h *partnerRouter) PartnerRouter(router *gin.RouterGroup) {
+	router.GET("/partner/:id", h.getPartnerDetail())
+	router.GET("/partners", h.getPartnerList())
+	router.POST("/partner", h.addPartner())
+	router.PUT("/partner", h.updatePartner())
+	router.DELETE("/partner/:id", h.deletePartner())
+}

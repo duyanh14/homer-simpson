@@ -2,11 +2,11 @@ package usecase
 
 import (
 	"context"
-	"simpson/internal/repository"
+	"simpson/internal/service"
 )
 
 type userUsecase struct {
-	userRepo repository.UserRepo
+	userService service.UserService
 }
 
 type UserUsecase interface {
@@ -14,15 +14,15 @@ type UserUsecase interface {
 }
 
 func NewUserUsecase(
-	userRepo repository.UserRepo,
+	userService service.UserService,
 ) UserUsecase {
 	return &userUsecase{
-		userRepo: userRepo,
+		userService: userService,
 	}
 }
 
 func (u *userUsecase) Register(ctx context.Context) error {
-	err := u.userRepo.Register(ctx)
+	err := u.userService.Register(ctx)
 	if err != nil {
 		return err
 	}
