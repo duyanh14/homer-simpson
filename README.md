@@ -17,13 +17,13 @@
 ```
 
 - không có data trả về:
-    - ok
+
 ```
 {
     "status":"OK", // OK or FAILED
 }
 ```
-    - false
+
 ```
 {
     "status":"OK", // OK or FAILED
