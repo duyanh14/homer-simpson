@@ -39,13 +39,13 @@ func (h *partnerRouter) addPartner() gin.HandlerFunc {
 			ctx.BadRequest(err)
 			return
 		}
-		err = h.valida.Struct(req)
-		if err != nil {
-			log.Errorf("error while validator err %v", err)
-			ctx.BadRequest(err)
-			return
-		}
-		log.Info("start call api add partner")
+		// err = h.valida.Struct(req)
+		// if err != nil {
+		// 	log.Errorf("error while validator err %v", err)
+		// 	ctx.BadRequest(err)
+		// 	return
+		// }
+		// log.Info("start call api add partner")
 		if err := h.partnerUsecase.AddPartner(ctx, req); err != nil {
 			log.Error("error %w", err)
 			ctx.BadLogic(err)

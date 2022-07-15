@@ -2,6 +2,9 @@ package api
 
 import (
 	"net/http"
+	"simpson/internal/dto"
+	"simpson/internal/helper"
+	"simpson/internal/helper/logger"
 	"simpson/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -20,13 +23,25 @@ func NewUserHandler(
 }
 
 func (h *userRouter) register() gin.HandlerFunc {
-	return func(ctx *gin.Context) {
-		err := h.userUsecase.Register(ctx)
+	return helper.WithContext(func(ctx *helper.ContextGin) {
+		var (
+			req = dto.UserDTO{}
+			log = logger.GetLogger()
+		)
+		err := ctx.ShouldBindJSON(&req)
 		if err != nil {
-			panic(err)
+			log.Error("error while bind json %v", err)
+			ctx.BadRequest(err)
+			return
 		}
-		ctx.JSON(http.StatusOK, nil)
-	}
+		err = h.userUsecase.Register(ctx, req)
+		if err != nil {
+			log.Error("error user register %w", err)
+			ctx.BadLogic(err)
+			return
+		}
+		ctx.OKResponse(nil)
+	})
 }
 
 type abc struct {

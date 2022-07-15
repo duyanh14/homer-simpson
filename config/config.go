@@ -18,6 +18,7 @@ postgres:
   database: postgres
   host: localhost
   port: 5432
+  migrate: true
 admin_dev:
   - ducnp
   - dev
