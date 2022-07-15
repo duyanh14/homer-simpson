@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"simpson/config"
+	"simpson/sql/migration"
 
 	"go.uber.org/zap"
 	"gorm.io/driver/postgres"
@@ -16,5 +17,14 @@ func InitPostgres(config config.Postgres) (*gorm.DB, error) {
 		return db, err
 	}
 	zap.S().Debug("connect to postgress successful")
+	if config.Migrate {
+		Migration(db)
+	}
 	return db, err
+}
+func Migration(db *gorm.DB) {
+	err := migration.CreateTableUser(db)
+	if err != nil {
+		zap.S().Error("migrator create table user err %s", err)
+	}
 }

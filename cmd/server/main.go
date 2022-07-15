@@ -8,7 +8,6 @@ import (
 	"os"
 	"simpson/config"
 	"simpson/internal/api"
-	"simpson/internal/api/validation"
 	"simpson/internal/helper/cache"
 	"simpson/internal/helper/db"
 	"simpson/internal/helper/logger"
@@ -117,7 +116,7 @@ func (s *Server) Router(usecase *usecase.Usecase) error {
 	// router.Use(helper.SetRequestID())
 
 	// router.Use(middleware)
-	validatorIn := validation.InitValidator()
+	// validatorIn := validation.InitValidator()
 	//
 	userRouter := api.NewUserHandler(usecase.UserUsecase)
 	userRouter.UserRouter(router)
@@ -128,7 +127,7 @@ func (s *Server) Router(usecase *usecase.Usecase) error {
 	permissionRouter := api.NewPermissionHandler()
 	permissionRouter.PermissionRouter(router)
 
-	partnerRouter := api.NewPartnerHandler(usecase.PartnerUsecase, validatorIn)
+	partnerRouter := api.NewPartnerHandler(usecase.PartnerUsecase, nil)
 	partnerRouter.PartnerRouter(router)
 
 	return nil
