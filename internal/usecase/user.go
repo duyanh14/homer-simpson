@@ -3,31 +3,38 @@ package usecase
 import (
 	"context"
 	"errors"
+	"simpson/config"
 	"simpson/internal/common"
 	"simpson/internal/dto"
 	"simpson/internal/helper/logger"
 	"simpson/internal/service"
 	"simpson/internal/service/model"
 	"simpson/internal/usecase/validation"
-	"unicode"
 
-	"golang.org/x/crypto/bcrypt"
 	"gorm.io/gorm"
 )
 
 type userUsecase struct {
+	config      *config.Config
 	userService service.UserService
+	jwtUsecase  JwtUsecase
 }
 
 type UserUsecase interface {
 	Register(ctx context.Context, req dto.UserDTO) error
+	Verify(ctx context.Context, req dto.UserVerifyDTO) error
+	Login(ctx context.Context, req dto.UserLoginReqDTO) (dto.UserLoginRespDTO, error)
 }
 
 func NewUserUsecase(
+	config *config.Config,
 	userService service.UserService,
+	jwtUsecase JwtUsecase,
 ) UserUsecase {
 	return &userUsecase{
+		config:      config,
 		userService: userService,
+		jwtUsecase:  jwtUsecase,
 	}
 }
 
@@ -37,7 +44,7 @@ func (u *userUsecase) Register(ctx context.Context, req dto.UserDTO) error {
 		err error
 	)
 
-	if err = u.validatorPw(req.Password); err != nil {
+	if err = validation.ValidatorPw(req.Password); err != nil {
 		log.Error("passwrd not security, err %s", err)
 		return err
 	}
@@ -76,7 +83,7 @@ func (u *userUsecase) Register(ctx context.Context, req dto.UserDTO) error {
 		}
 	}
 
-	pass, err := hashPw(req.Password)
+	pass, err := validation.HashPw(req.Password)
 	if err != nil {
 		log.Errorf("error while hass password error %v", err)
 		return errors.New("hash password failed")
@@ -95,60 +102,55 @@ func (u *userUsecase) Register(ctx context.Context, req dto.UserDTO) error {
 	return nil
 }
 
-/*
- * Password rules:
- * at least 7 letters
- * at max 20 letters
- * at least 1 number
- * at least 1 upper case
- * at least 1 special character
- */
-func (u *userUsecase) validatorPw(pw string) error {
+func (u *userUsecase) Login(ctx context.Context, req dto.UserLoginReqDTO) (dto.UserLoginRespDTO, error) {
 	var (
-		hasUpper   = false
-		hasLower   = false
-		hasNumber  = false
-		hasSpecial = false
+		log  = logger.GetLogger()
+		err  error
+		resp = dto.UserLoginRespDTO{}
 	)
-	if len(pw) < 7 {
-		return errors.New("password least 7 letters")
+	if req.Username == "" {
+		return resp, errors.New("username is required")
 	}
-	if len(pw) > 20 {
-		return errors.New("password max 20 letters")
+	if req.Password == "" {
+		return resp, errors.New("username is required")
 	}
-	for _, charStr := range pw {
-		switch {
-		case unicode.IsUpper(charStr):
-			hasUpper = true
-		case unicode.IsLower(charStr):
-			hasLower = true
-		case unicode.IsNumber(charStr):
-			hasNumber = true
-		case unicode.IsPunct(charStr) || unicode.IsSymbol(charStr):
-			hasSpecial = true
+	userDetail, err := u.userService.GetUserByUsername(ctx, req.Username)
+	if err != nil {
+		log.Error("get user username %s detail err %s", req.Username, err)
+		if err == gorm.ErrRecordNotFound {
+			return resp, errors.New("username not found")
 		}
+		return resp, common.ErrDatabase
 	}
-	if !hasUpper {
-		return errors.New("password least 1 upper case")
+	err = validation.CheckPasswordHash(userDetail.Password, req.Password)
+	if err != nil {
+		log.Error("check password hash of username %s,err %s", req.Username, err)
+		return resp, errors.New("password invalid")
 	}
-	if !hasNumber {
-		return errors.New("password least 1 number")
+	resp.Jwt, err = u.jwtUsecase.GeneratorToken(ctx, dto.JwtReq{
+		UserID:   userDetail.ID,
+		Username: userDetail.Username,
+		Email:    userDetail.Email,
+		Phone:    userDetail.Phone,
+	})
+	if err != nil {
+		log.Error("generator token jwt of username %s, err %s", req.Username, err)
+		return resp, common.ErrCommon
 	}
-	if !hasLower {
-		return errors.New("password least 1 lower case")
-	}
-	if !hasSpecial {
-		return errors.New("password least 1 special character")
-	}
+	return resp, err
+}
 
+func (u *userUsecase) Verify(ctx context.Context, req dto.UserVerifyDTO) error {
+	log := logger.GetLogger()
+
+	if req.Jwt == "" {
+
+		return errors.New("token is required")
+	}
+	_, err := u.jwtUsecase.VerifyToken(ctx, req.Jwt)
+	if err != nil {
+		log.Error("verify jwt err %s", err)
+		return err
+	}
 	return nil
-}
-
-func hashPw(pw string) (string, error) {
-	bytes, err := bcrypt.GenerateFromPassword([]byte(pw), 14)
-	return string(bytes), err
-}
-
-func checkPasswordHash(hashedPassword, password string) error {
-	return bcrypt.CompareHashAndPassword([]byte(hashedPassword), []byte(password))
 }

@@ -31,3 +31,10 @@
     "message":"database error"
 }
 ```
+
+## gen key
+
+```
+ssh-keygen -t rsa -b 4096 -E SHA512 -m PEM -P "" -f RS512.key
+openssl rsa -in RS512.key -pubout -outform PEM -out RS512.key.pub
+```

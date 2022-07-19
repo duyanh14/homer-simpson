@@ -62,35 +62,27 @@ func (h *partnerRouter) deletePartner() gin.HandlerFunc {
 		log.Debug("delete partner 1 ")
 		log.Debug("delete partner 2")
 		log.Debug("delete partner 3")
-		ctx.JSON(http.StatusOK, abc{
-			Name: "ducnp",
-		})
+		ctx.JSON(http.StatusOK, nil)
 
 	}
 }
 
 func (h *partnerRouter) getPartnerDetail() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, abc{
-			Name: "ducnp",
-		})
+		ctx.JSON(http.StatusOK, nil)
 
 	}
 }
 
 func (h *partnerRouter) getPartnerList() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, abc{
-			Name: "ducnp",
-		})
+		ctx.JSON(http.StatusOK, nil)
 
 	}
 }
 
 func (h *partnerRouter) updatePartner() gin.HandlerFunc {
 	return func(ctx *gin.Context) {
-		ctx.JSON(http.StatusOK, abc{
-			Name: "ducnp",
-		})
+		ctx.JSON(http.StatusOK, nil)
 	}
 }

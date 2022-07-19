@@ -10,7 +10,7 @@ import (
 type ContextGin struct {
 	*gin.Context
 }
-type responseData struct {
+type ResponseData struct {
 	StatusCode string      `json:"status"`
 	Message    string      `json:"message,omitempty"`
 	Code       string      `json:"code,omitempty"`
@@ -28,7 +28,7 @@ func WithContext(handler HandlerFunc) gin.HandlerFunc {
 }
 
 func (c *ContextGin) BadRequest(err error) {
-	resp := responseData{
+	resp := ResponseData{
 		StatusCode: common.Failed,
 		Message:    common.ErrorMessage(err),
 	}
@@ -36,7 +36,7 @@ func (c *ContextGin) BadRequest(err error) {
 }
 
 func (c *ContextGin) BadLogic(err error) {
-	resp := responseData{
+	resp := ResponseData{
 		StatusCode: common.Failed,
 		Message:    common.ErrorMessage(err),
 		Code:       common.ErrorCode(err),
@@ -46,7 +46,7 @@ func (c *ContextGin) BadLogic(err error) {
 }
 
 func (c *ContextGin) OKResponse(data interface{}) {
-	resp := responseData{
+	resp := ResponseData{
 		StatusCode: common.OK,
 	}
 	if data != nil {
@@ -60,4 +60,7 @@ func (c *ContextGin) responseJson(code int, data interface{}) {
 	if code != http.StatusOK {
 		c.Abort()
 	}
+}
+
+func (c *ContextGin) TokenNotFound() {
 }
