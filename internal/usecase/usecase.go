@@ -12,6 +12,7 @@ type Usecase struct {
 	PartnerUsecase    PartnerUsecase
 	JwtUsecase        JwtUsecase
 	PermissionUsecase PermissionUsecase
+	RoleUsecase       RoleUsecase
 }
 
 func InitUsecase(ctx context.Context, repo service.Service, cfg *config.Config) (*Usecase, error) {
@@ -23,6 +24,7 @@ func InitUsecase(ctx context.Context, repo service.Service, cfg *config.Config) 
 		return nil, err
 	}
 	jwtUsecase := NewJwtUsecase(cfg, pri, pub, sign)
+	roleUsecase := NewRoleUsecase(cfg, repo.NewRoleService())
 	userUsecase := NewUserUsecase(cfg, repo.NewUserService(), jwtUsecase)
 	permissionUsecase := NewPermissionUsecase(cfg, repo.NewPermissionService())
 	return &Usecase{
@@ -30,5 +32,6 @@ func InitUsecase(ctx context.Context, repo service.Service, cfg *config.Config) 
 		PartnerUsecase:    NewPartnerUsecase(repo.NewPartnerService()),
 		JwtUsecase:        jwtUsecase,
 		PermissionUsecase: permissionUsecase,
+		RoleUsecase:       roleUsecase,
 	}, nil
 }

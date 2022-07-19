@@ -120,7 +120,7 @@ func (s *Server) Router(usecase *usecase.Usecase) error {
 	userRouter := api.NewUserHandler(usecase.UserUsecase)
 	userRouter.UserRouter(router)
 
-	roleRouter := api.NewRoleHandler()
+	roleRouter := api.NewRoleHandler(usecase.RoleUsecase)
 	roleRouter.RoleRouter(router)
 
 	permissionRouter := api.NewPermissionHandler(usecase.PermissionUsecase)
