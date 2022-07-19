@@ -80,7 +80,7 @@ func (s *Server) Init(ctx context.Context) error {
 		return err
 	}
 
-	usecase, err := usecase.InitUsecase(ctx, repo)
+	usecase, err := usecase.InitUsecase(ctx, repo, cfg)
 	if err != nil {
 		return err
 	}
