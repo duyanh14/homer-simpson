@@ -1,39 +1,70 @@
 package helper
 
 import (
-	"context"
-	"fmt"
-	"simpson/internal/dto"
+	"net/http"
+	"simpson/internal/common"
+	"simpson/internal/usecase"
+	"strings"
 
-	"github.com/dgrijalva/jwt-go"
+	"github.com/gin-gonic/gin"
 )
 
-func GeneratorToken(ctx context.Context, req dto.JwtReq, cfg dto.JwtConfig) (string, error) {
-	var (
-		token string
-		err   error
-	)
-	jwtSignMethod := jwt.GetSigningMethod(cfg.SigningMethod)
-	jwtToken := jwt.New(jwtSignMethod)
+const (
+	tokenParttern = "^Bearer (\\S*)"
+)
 
-	jwtClaim := dto.JwtClaim{
-		Username: req.Username,
-		UserID:   req.UserID,
-		StandardClaims: &jwt.StandardClaims{
-			ExpiresAt: cfg.ExpiresAt,
-			Issuer:    cfg.Issuer,
-		},
+func ignoreAuthen(arr []string, method string) bool {
+	for _, item := range arr {
+		if strings.Contains(method, item) {
+			return true
+		}
 	}
-	jwtToken.Claims = jwtClaim
-
-	fmt.Println(jwtToken)
-	return token, err
+	return false
 }
 
-func VerifyToken(ctx context.Context, token, tokenRefesh string) (*dto.JwtClaim, error) {
-	var (
-		resp = &dto.JwtClaim{}
-		err  error
-	)
-	return resp, err
+func AuthenticationJwt(jwt usecase.JwtUsecase, listIgnore []string) gin.HandlerFunc {
+	return func(ctx *gin.Context) {
+		if ignoreAuthen(listIgnore, ctx.Request.RequestURI) {
+			ctx.Next()
+			return
+		}
+
+		token := ctx.Request.Header.Get("Authorization")
+		if token == "" {
+			ctx.JSON(http.StatusUnauthorized, ResponseData{
+				StatusCode: common.Failed,
+				Message:    "Authorization not found",
+			})
+			ctx.Abort()
+			return
+		}
+		splitToken := strings.Split(token, " ")
+		if len(splitToken) != 2 {
+			ctx.JSON(http.StatusUnauthorized, ResponseData{
+				StatusCode: common.Failed,
+				Message:    "Authorization not found",
+			})
+			ctx.Abort()
+			return
+		}
+		claim, err := jwt.VerifyToken(ctx, splitToken[1])
+		if err != nil {
+			messageStr := ""
+			if err == common.ErrTokenExpired {
+				messageStr = err.Error()
+			}
+			if err == common.ErrTokenInvalid {
+				messageStr = err.Error()
+			}
+			ctx.JSON(http.StatusUnauthorized, ResponseData{
+				StatusCode: common.Failed,
+				Message:    messageStr,
+			})
+			ctx.Abort()
+			return
+		}
+		ctx.Set("user_id", claim.UserID)
+		ctx.Set("user_name", claim.Username)
+		ctx.Next()
+	}
 }

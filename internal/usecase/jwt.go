@@ -4,9 +4,10 @@ import (
 	"context"
 	"crypto/rsa"
 	"encoding/base64"
-	"errors"
 	"simpson/config"
+	"simpson/internal/common"
 	"simpson/internal/dto"
+	"time"
 
 	"github.com/dgrijalva/jwt-go"
 )
@@ -62,7 +63,7 @@ func ParseKey(cfg *config.Config) (*rsa.PrivateKey, *rsa.PublicKey, jwt.SigningM
 	if err != nil {
 		return private, public, sign, err
 	}
-	return private, public, sign, err
+	return private, public, jwt.GetSigningMethod(cfg.JWT.SigningMethod), err
 }
 
 func (j *jwtUsecase) GeneratorToken(ctx context.Context, req dto.JwtReq) (string, error) {
@@ -72,10 +73,13 @@ func (j *jwtUsecase) GeneratorToken(ctx context.Context, req dto.JwtReq) (string
 	)
 	jwtToken := jwt.New(j.signMethod)
 	jwtClaim := dto.JwtClaim{
-		Username: req.Username,
-		UserID:   req.UserID,
+		Username:    req.Username,
+		UserID:      req.UserID,
+		RefestToken: "", // TODO
+		Email:       req.Email,
+		Phone:       req.Phone,
 		StandardClaims: &jwt.StandardClaims{
-			ExpiresAt: int64(j.cfg.JWT.ShortTokenExpireTime),
+			ExpiresAt: time.Now().Add(time.Second * time.Duration(j.cfg.JWT.ShortTokenExpireTime)).Unix(),
 			Issuer:    j.cfg.JWT.Issuer,
 		},
 	}
@@ -95,12 +99,13 @@ func (j *jwtUsecase) VerifyToken(ctx context.Context, tokenStr string) (dto.JwtC
 		return j.publicKey, nil
 	}
 	token, err := jwt.ParseWithClaims(tokenStr, &claims, keyFunc)
+
 	jwtErr, _ := err.(*jwt.ValidationError)
 	if jwtErr != nil && jwtErr.Errors == jwt.ValidationErrorExpired {
-		return claims, errors.New("token expired")
+		return claims, common.ErrTokenExpired
 	}
 	if err != nil || !token.Valid {
-		return claims, errors.New("token invalid")
+		return claims, common.ErrTokenInvalid
 	}
 	return claims, nil
 }

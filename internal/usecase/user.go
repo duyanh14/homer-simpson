@@ -6,13 +6,11 @@ import (
 	"simpson/config"
 	"simpson/internal/common"
 	"simpson/internal/dto"
-	"simpson/internal/helper"
 	"simpson/internal/helper/logger"
 	"simpson/internal/service"
 	"simpson/internal/service/model"
 	"simpson/internal/usecase/validation"
 
-	"github.com/dgrijalva/jwt-go"
 	"gorm.io/gorm"
 )
 
@@ -24,6 +22,7 @@ type userUsecase struct {
 
 type UserUsecase interface {
 	Register(ctx context.Context, req dto.UserDTO) error
+	Verify(ctx context.Context, req dto.UserVerifyDTO) error
 	Login(ctx context.Context, req dto.UserLoginReqDTO) (dto.UserLoginRespDTO, error)
 }
 
@@ -128,21 +127,30 @@ func (u *userUsecase) Login(ctx context.Context, req dto.UserLoginReqDTO) (dto.U
 		log.Error("check password hash of username %s,err %s", req.Username, err)
 		return resp, errors.New("password invalid")
 	}
-	resp.Jwt, err = helper.GeneratorToken(ctx, dto.JwtReq{
+	resp.Jwt, err = u.jwtUsecase.GeneratorToken(ctx, dto.JwtReq{
 		UserID:   userDetail.ID,
-		Username: req.Username,
-	}, dto.JwtConfig{
-		SigningMethod: u.config.JWT.SigningMethod,
-		PublicKey:     u.config.JWT.PublicKey,
-		PrivateKey:    u.config.JWT.PrivateKey,
-		StandardClaims: jwt.StandardClaims{
-			ExpiresAt: int64(u.config.JWT.ShortTokenExpireTime),
-			Issuer:    u.config.JWT.Issuer,
-		},
+		Username: userDetail.Username,
+		Email:    userDetail.Email,
+		Phone:    userDetail.Phone,
 	})
 	if err != nil {
 		log.Error("generator token jwt of username %s, err %s", req.Username, err)
 		return resp, common.ErrCommon
 	}
 	return resp, err
+}
+
+func (u *userUsecase) Verify(ctx context.Context, req dto.UserVerifyDTO) error {
+	log := logger.GetLogger()
+
+	if req.Jwt == "" {
+
+		return errors.New("token is required")
+	}
+	_, err := u.jwtUsecase.VerifyToken(ctx, req.Jwt)
+	if err != nil {
+		log.Error("verify jwt err %s", err)
+		return err
+	}
+	return nil
 }

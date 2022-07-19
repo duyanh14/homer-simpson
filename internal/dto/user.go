@@ -15,4 +15,8 @@ type (
 	UserLoginRespDTO struct {
 		Jwt string `json:"jwt"`
 	}
+
+	UserVerifyDTO struct {
+		Jwt string `json:"jwt"`
+	}
 )

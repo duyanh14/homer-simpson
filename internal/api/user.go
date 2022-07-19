@@ -65,3 +65,25 @@ func (h *userRouter) login() gin.HandlerFunc {
 		ctx.OKResponse(resp)
 	})
 }
+
+func (h *userRouter) verifyToken() gin.HandlerFunc {
+	return helper.WithContext(func(ctx *helper.ContextGin) {
+		var (
+			req = dto.UserVerifyDTO{}
+			log = logger.GetLogger()
+		)
+		err := ctx.ShouldBindJSON(&req)
+		if err != nil {
+			log.Error("error while bind json %v", err)
+			ctx.BadRequest(err)
+			return
+		}
+		err = h.userUsecase.Verify(ctx, req)
+		if err != nil {
+			log.Error("error user register %w", err)
+			ctx.BadLogic(err)
+			return
+		}
+		ctx.OKResponse(nil)
+	})
+}

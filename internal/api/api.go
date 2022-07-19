@@ -3,6 +3,7 @@ package api
 import "github.com/gin-gonic/gin"
 
 func (h *userRouter) UserRouter(router *gin.RouterGroup) {
+	router.POST("/user/verify", h.verifyToken())
 	router.POST("/user/register", h.register())
 	router.POST("/user/login", h.login())
 }

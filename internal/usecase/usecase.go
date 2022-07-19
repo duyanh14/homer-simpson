@@ -8,8 +8,10 @@ import (
 )
 
 type Usecase struct {
-	UserUsecase    UserUsecase
-	PartnerUsecase PartnerUsecase
+	UserUsecase       UserUsecase
+	PartnerUsecase    PartnerUsecase
+	JwtUsecase        JwtUsecase
+	PermissionUsecase PermissionUsecase
 }
 
 func InitUsecase(ctx context.Context, repo service.Service, cfg *config.Config) (*Usecase, error) {
@@ -22,8 +24,11 @@ func InitUsecase(ctx context.Context, repo service.Service, cfg *config.Config) 
 	}
 	jwtUsecase := NewJwtUsecase(cfg, pri, pub, sign)
 	userUsecase := NewUserUsecase(cfg, repo.NewUserService(), jwtUsecase)
+	permissionUsecase := NewPermissionUsecase(cfg, repo.NewPermissionService())
 	return &Usecase{
-		UserUsecase:    userUsecase,
-		PartnerUsecase: NewPartnerUsecase(repo.NewPartnerService()),
+		UserUsecase:       userUsecase,
+		PartnerUsecase:    NewPartnerUsecase(repo.NewPartnerService()),
+		JwtUsecase:        jwtUsecase,
+		PermissionUsecase: permissionUsecase,
 	}, nil
 }
