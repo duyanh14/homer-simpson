@@ -35,4 +35,9 @@ func Migration(db *gorm.DB) {
 	if err != nil {
 		zap.S().Error("migrator create table role err %s", err)
 	}
+
+	err = migration.CreateTableUserRole(db)
+	if err != nil {
+		zap.S().Error("migrator create table user role err %s", err)
+	}
 }

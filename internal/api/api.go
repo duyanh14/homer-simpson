@@ -6,6 +6,12 @@ func (h *userRouter) UserRouter(router *gin.RouterGroup) {
 	router.POST("/user/verify", h.verifyToken())
 	router.POST("/user/register", h.register())
 	router.POST("/user/login", h.login())
+
+}
+
+func (h *userRoleRouter) UserRoleRouter(router *gin.RouterGroup) {
+	// add list role for user,
+	router.POST("/user/role", h.addUserRole())
 }
 
 func (h *roleRouter) RoleRouter(router *gin.RouterGroup) {
