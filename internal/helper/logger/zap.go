@@ -51,6 +51,10 @@ func configure() zapcore.WriteSyncer {
 }
 
 func GetLogger() *logger {
+	if Logger == nil {
+		// TODO logging
+		Newlogger(config.Logger{})
+	}
 	return Logger
 }
 

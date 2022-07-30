@@ -116,7 +116,6 @@ func (s *Server) Router(usecase *usecase.Usecase) error {
 
 	router.Use(helper.AuthenticationJwt(usecase.JwtUsecase, s.cfg.IgnoreAuthen))
 	// validatorIn := validation.InitValidator()
-	//
 	userRouter := api.NewUserHandler(usecase.UserUsecase)
 	userRouter.UserRouter(router)
 
@@ -128,6 +127,9 @@ func (s *Server) Router(usecase *usecase.Usecase) error {
 
 	partnerRouter := api.NewPartnerHandler(usecase.PartnerUsecase, nil)
 	partnerRouter.PartnerRouter(router)
+
+	userRoleRouter := api.NewUserRoleHandler(usecase.UserRoleUsecase)
+	userRoleRouter.UserRoleRouter(router)
 
 	return nil
 }
