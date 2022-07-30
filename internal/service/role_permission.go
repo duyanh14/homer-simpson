@@ -7,26 +7,27 @@ import (
 	"gorm.io/gorm"
 )
 
-type rolePermissionPermissionService struct {
+type rolePermissionService struct {
 	gormDB *gorm.DB
 }
+
 type RolePermissionService interface {
-	AddRolePermission(ctx context.Context, tx *gorm.DB, rolePermissionPermission model.RolePermission) error
+	AddRolePermission(ctx context.Context, tx *gorm.DB, rolePer model.RolePermission) error
 }
 
 func NewRolePermissionService(
 	db *gorm.DB,
 ) RolePermissionService {
-	return &rolePermissionPermissionService{
+	return &rolePermissionService{
 		gormDB: db,
 	}
 }
 
-func (r *rolePermissionPermissionService) AddRolePermission(ctx context.Context, tx *gorm.DB, rolePermissionPermission model.RolePermission) error {
+func (r *rolePermissionService) AddRolePermission(ctx context.Context, tx *gorm.DB, rolePermission model.RolePermission) error {
 	db := tx
 	if tx == nil {
 		db = r.gormDB
 	}
-	err := db.Create(&rolePermissionPermission).Error
+	err := db.Create(&rolePermission).Error
 	return err
 }

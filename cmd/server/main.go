@@ -4,6 +4,7 @@ import (
 	"context"
 	"errors"
 	"fmt"
+	"log"
 	"net/http"
 	"os"
 	"simpson/config"
@@ -131,6 +132,9 @@ func (s *Server) Router(usecase *usecase.Usecase) error {
 	userRoleRouter := api.NewUserRoleHandler(usecase.UserRoleUsecase)
 	userRoleRouter.UserRoleRouter(router)
 
+	rolePerRouter := api.NewRolePermissionHandler(usecase.RolePermissionUsecase)
+	rolePerRouter.RolePermissionRouter(router)
+
 	return nil
 }
 
@@ -152,7 +156,8 @@ func main() {
 	}
 	err = s.Init(ctx)
 	if err != nil {
-		panic(err)
+		log.Default().Panic(err)
+		// panic(err)
 	}
 	zap.S().Debug("Start project ok at port %s", s.cfg.HTTPAddress)
 	if err := s.ListenHTTP(); err != nil {

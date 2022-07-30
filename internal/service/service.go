@@ -14,6 +14,7 @@ type Service interface {
 	NewRoleService() RoleService
 	NewCommonService() CommonService
 	NewUserRoleService() UserRoleService
+	NewRolePermisiosnService() RolePermissionService
 }
 type service struct {
 	gorm *gorm.DB
@@ -29,6 +30,10 @@ func InitService(ctx context.Context, db *gorm.DB) (Service, error) {
 }
 func (r *service) BuildTransaction(ctx context.Context) *gorm.DB {
 	return r.gorm
+}
+
+func (r *service) NewRolePermisiosnService() RolePermissionService {
+	return NewRolePermissionService(r.gorm)
 }
 
 func (r *service) NewUserRoleService() UserRoleService {
@@ -57,15 +62,15 @@ func (r *service) NewCommonService() CommonService {
 
 // common server
 type CommonService interface {
-	GetDatabase(ctx context.Context) *gorm.DB
+	GetDatabaseTx(ctx context.Context) *gorm.DB
 }
 
 type commonService struct {
 	gormDB *gorm.DB
 }
 
-func (r *commonService) GetDatabase(ctx context.Context) *gorm.DB {
-	return r.gormDB
+func (r *commonService) GetDatabaseTx(ctx context.Context) *gorm.DB {
+	return r.gormDB.Begin()
 }
 
 func NewCommonService(

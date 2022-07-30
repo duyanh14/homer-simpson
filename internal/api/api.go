@@ -14,6 +14,10 @@ func (h *userRoleRouter) UserRoleRouter(router *gin.RouterGroup) {
 	router.POST("/user/role", h.addUserRole())
 }
 
+func (h *rolePermissionRouter) RolePermissionRouter(router *gin.RouterGroup) {
+	router.POST("/role/permisison", h.addRolePermission())
+}
+
 func (h *roleRouter) RoleRouter(router *gin.RouterGroup) {
 	router.DELETE("/role", h.deleteRole())
 	router.POST("/role", h.addRole())

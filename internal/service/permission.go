@@ -12,9 +12,7 @@ type permissionService struct {
 }
 type PermissionService interface {
 	AddPermission(ctx context.Context, permission model.Permission) error
-	// GetPermissionByPermissionname(ctx context.Context, permissionname string) (model.Permission, error)
-	// GetPermissionByPhone(ctx context.Context, phone string) (model.Permission, error)
-	// GetPermissionByEmail(ctx context.Context, email string) (model.Permission, error)
+	GetPermissionByID(ctx context.Context, tx *gorm.DB, id uint) (model.Permission, error)
 }
 
 func NewPermissionService(
@@ -30,38 +28,18 @@ func (r *permissionService) AddPermission(ctx context.Context, permission model.
 	return err
 }
 
-// func (r *permissionService) GetPermissionByPermissionname(ctx context.Context, permissionname string) (model.Permission, error) {
-// 	var (
-// 		permission model.Permission
-// 		err  error
-// 	)
-// 	err = r.gormDB.Table(permission.Table()).Where("permissionname = ?", permissionname).First(&permission).Error
-// 	if err != nil {
-// 		return permission, err
-// 	}
-// 	return permission, nil
-// }
-
-// func (r *permissionService) GetPermissionByEmail(ctx context.Context, email string) (model.Permission, error) {
-// 	var (
-// 		permission model.Permission
-// 		err  error
-// 	)
-// 	err = r.gormDB.Table(permission.Table()).Where("email = ?", email).First(&permission).Error
-// 	if err != nil {
-// 		return permission, err
-// 	}
-// 	return permission, nil
-// }
-
-// func (r *permissionService) GetPermissionByPhone(ctx context.Context, phone string) (model.Permission, error) {
-// 	var (
-// 		permission model.Permission
-// 		err  error
-// 	)
-// 	err = r.gormDB.Table(permission.Table()).Where("phone = ?", phone).First(&permission).Error
-// 	if err != nil {
-// 		return permission, err
-// 	}
-// 	return permission, nil
-// }
+func (r *permissionService) GetPermissionByID(ctx context.Context, tx *gorm.DB, id uint) (model.Permission, error) {
+	var (
+		per model.Permission
+		err error
+	)
+	db := tx
+	if tx == nil {
+		db = r.gormDB
+	}
+	err = db.Table(per.Table()).Where("id = ?", id).First(&per).Error
+	if err != nil {
+		return per, err
+	}
+	return per, nil
+}

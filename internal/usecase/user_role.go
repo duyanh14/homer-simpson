@@ -55,7 +55,7 @@ func (u *userRoleUsecase) AddUserRole(ctx context.Context, req dto.AddUserRoleRe
 		return errors.New("user id not found")
 	}
 
-	tx := u.commonService.GetDatabase(ctx).Begin()
+	tx := u.commonService.GetDatabaseTx(ctx)
 
 	defer func() {
 		if r := recover(); r != nil {

@@ -11,5 +11,5 @@ type RolePermission struct {
 }
 
 func (u RolePermission) Table() string {
-	return "role_permission"
+	return "role_permissions"
 }

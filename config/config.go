@@ -32,12 +32,12 @@ jwt:
   is_refresh_token: false
   refresh_token_expire: 216000
   long_token_expire: 216000
-  short_token_expire: 3600
+  short_token_expire: 216000
   issuer: "simpson"
 redis_setting:
   addrs:
-  - redis-14409.c1.ap-southeast-1-1.ec2.cloud.redislabs.com:14409
-  password: ZW2IrPDs7DboDQgVok952YhXFO5ezzmK
+  - redis-14409.c1.abs2.cloud.reddsf.com:14409
+  password: abc
   database: 0 #redisshop
 logger:
   mode: development
