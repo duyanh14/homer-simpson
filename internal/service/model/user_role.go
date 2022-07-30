@@ -8,8 +8,6 @@ type UserRole struct {
 	CreatedBy   uint   `gorm:"column:created_by" bson:"created_by"`
 	UserID      uint   `gorm:"column:user_id;not null;" bson:"user_id"`
 	RoleID      uint   `gorm:"column:role_id;not null" bson:"role_id"`
-
-	User User `gorm:"foreignKey:UserID"`
 }
 
 func (u UserRole) Table() string {
