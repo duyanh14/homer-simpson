@@ -12,8 +12,10 @@ import (
 )
 
 type permissionUsecase struct {
-	config            *config.Config
-	permissionService service.PermissionService
+	config                *config.Config
+	permissionService     service.PermissionService
+	rolePermissionService service.RolePermissionService
+	userRoleService       service.UserRoleService
 }
 
 type PermissionUsecase interface {
@@ -24,10 +26,14 @@ type PermissionUsecase interface {
 func NewPermissionUsecase(
 	config *config.Config,
 	permissionService service.PermissionService,
+	rolePermissionService service.RolePermissionService,
+	userRoleService service.UserRoleService,
 ) PermissionUsecase {
 	return &permissionUsecase{
-		config:            config,
-		permissionService: permissionService,
+		config:                config,
+		permissionService:     permissionService,
+		rolePermissionService: rolePermissionService,
+		userRoleService:       userRoleService,
 	}
 }
 
@@ -41,6 +47,17 @@ func (u *permissionUsecase) GetPermissions(ctx context.Context) ([]string, error
 	if userID == 0 {
 		return pers, common.ErrUserIDNotFoundInJwt
 	}
+
+	roles, err := u.userRoleService.GetRolesByUserID(ctx, userID)
+	if err != nil {
+		log.Errorf("get list role of userID %d, error  %v", userID, err)
+		return pers, common.ErrDatabase
+	}
+	if len(roles) == 0 {
+		log.Errorf("get list permission, roles of userID %d not found ", userID)
+		return pers, common.ErrPermisisonNotFound
+	}
+
 	persModel, err := u.permissionService.GetPermissionsUserId(ctx, userID)
 	if err != nil {
 		log.Errorf("get list permission of userID %d, error  %v", userID, err)

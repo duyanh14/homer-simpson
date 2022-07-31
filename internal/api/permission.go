@@ -21,20 +21,6 @@ func NewPermissionHandler(
 	}
 }
 
-// get list permission by userID(use jwt)
-func (h *permissionRouter) listPermission() gin.HandlerFunc {
-	return helper.WithContext(func(ctx *helper.ContextGin) {
-		log := logger.GetLogger()
-		pers, err := h.permissionUsecase.GetPermissions(ctx)
-		if err != nil {
-			log.Error("get list permission, error %w", err)
-			ctx.BadLogic(err)
-			return
-		}
-		ctx.OKResponse(pers)
-	})
-}
-
 func (h *permissionRouter) addPermission() gin.HandlerFunc {
 	return helper.WithContext(func(ctx *helper.ContextGin) {
 		var (

@@ -27,10 +27,9 @@ func InitUsecase(ctx context.Context, repo service.Service, cfg *config.Config) 
 	}
 	jwtUsecase := NewJwtUsecase(cfg, pri, pub, sign)
 	roleUsecase := NewRoleUsecase(cfg, repo.NewRoleService())
-	userUsecase := NewUserUsecase(cfg, repo.NewUserService(), jwtUsecase)
-	permissionUsecase := NewPermissionUsecase(cfg, repo.NewPermissionService())
+	userUsecase := NewUserUsecase(cfg, repo.NewUserService(), jwtUsecase, repo.NewPermissionService(), repo.NewRolePermisiosnService(), repo.NewUserRoleService())
+	permissionUsecase := NewPermissionUsecase(cfg, repo.NewPermissionService(), repo.NewRolePermisiosnService(), repo.NewUserRoleService())
 	userRoleUsecase := NewUserRoleUsecase(cfg, repo.NewUserRoleService(), repo.NewCommonService(), repo.NewUserService(), repo.NewRoleService())
-
 	rolePerUsecase := NewRolePermissionUsecase(cfg, repo.NewRolePermisiosnService(), repo.NewCommonService(), repo.NewPermissionService(), repo.NewRoleService())
 
 	return &Usecase{

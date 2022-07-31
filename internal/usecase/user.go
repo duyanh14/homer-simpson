@@ -3,6 +3,7 @@ package usecase
 import (
 	"context"
 	"errors"
+	"fmt"
 	"simpson/config"
 	"simpson/internal/common"
 	"simpson/internal/dto"
@@ -10,31 +11,42 @@ import (
 	"simpson/internal/service"
 	"simpson/internal/service/model"
 	"simpson/internal/usecase/validation"
+	"strings"
 
 	"gorm.io/gorm"
 )
 
 type userUsecase struct {
-	config      *config.Config
-	userService service.UserService
-	jwtUsecase  JwtUsecase
+	config                *config.Config
+	userService           service.UserService
+	jwtUsecase            JwtUsecase
+	permissionService     service.PermissionService
+	rolePermissionService service.RolePermissionService
+	userRoleService       service.UserRoleService
 }
 
 type UserUsecase interface {
 	Register(ctx context.Context, req dto.UserDTO) error
 	Verify(ctx context.Context, req dto.UserVerifyDTO) error
 	Login(ctx context.Context, req dto.UserLoginReqDTO) (dto.UserLoginRespDTO, error)
+	GetPermissions(ctx context.Context) ([]string, error)
 }
 
 func NewUserUsecase(
 	config *config.Config,
 	userService service.UserService,
 	jwtUsecase JwtUsecase,
+	permissionService service.PermissionService,
+	rolePermissionService service.RolePermissionService,
+	userRoleService service.UserRoleService,
 ) UserUsecase {
 	return &userUsecase{
-		config:      config,
-		userService: userService,
-		jwtUsecase:  jwtUsecase,
+		config:                config,
+		userService:           userService,
+		jwtUsecase:            jwtUsecase,
+		permissionService:     permissionService,
+		rolePermissionService: rolePermissionService,
+		userRoleService:       userRoleService,
 	}
 }
 
@@ -153,4 +165,42 @@ func (u *userUsecase) Verify(ctx context.Context, req dto.UserVerifyDTO) error {
 		return err
 	}
 	return nil
+}
+
+func (u *userUsecase) GetPermissions(ctx context.Context) ([]string, error) {
+	var (
+		pers    []string
+		err     error
+		log     = logger.GetLogger()
+		roleIDs []string
+	)
+	userID := ctx.Value("user_id").(uint)
+	if userID == 0 {
+		return pers, common.ErrUserIDNotFoundInJwt
+	}
+
+	roles, err := u.userRoleService.GetRolesByUserID(ctx, userID)
+	if err != nil {
+		log.Errorf("get list role of userID %d, error  %v", userID, err)
+		return pers, common.ErrDatabase
+	}
+	if len(roles) == 0 {
+		log.Errorf("get list permission, roles of userID %d not found ", userID)
+		return pers, common.ErrPermisisonNotFound
+	}
+	for _, role := range roles {
+		roleIDs = append(roleIDs, fmt.Sprintf("%d", role.ID))
+	}
+	strRole := strings.Join(roleIDs, ",")
+	fmt.Println(strRole)
+	persModel, err := u.rolePermissionService.GetPermissionsByRoleIDs(ctx, strRole)
+	if err != nil {
+		log.Errorf("get list permission of roles %s, error  %v", strRole, err)
+		return pers, common.ErrDatabase
+	}
+	pers = make([]string, len(persModel))
+	for i, permission := range persModel {
+		pers[i] = permission.Code
+	}
+	return pers, err
 }
