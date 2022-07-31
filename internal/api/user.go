@@ -87,3 +87,17 @@ func (h *userRouter) verifyToken() gin.HandlerFunc {
 		ctx.OKResponse(nil)
 	})
 }
+
+// get list permission by userID(use jwt)
+func (h *userRouter) listPermission() gin.HandlerFunc {
+	return helper.WithContext(func(ctx *helper.ContextGin) {
+		log := logger.GetLogger()
+		pers, err := h.userUsecase.GetPermissions(ctx)
+		if err != nil {
+			log.Error("get list permission, error %w", err)
+			ctx.BadLogic(err)
+			return
+		}
+		ctx.OKResponse(pers)
+	})
+}

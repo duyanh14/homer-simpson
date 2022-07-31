@@ -12,6 +12,7 @@ type userUserRoleService struct {
 }
 type UserRoleService interface {
 	AddUserRole(ctx context.Context, tx *gorm.DB, userUserRole model.UserRole) error
+	GetRolesByUserID(ctx context.Context, userID uint) ([]model.Role, error)
 }
 
 func NewUserRoleService(
@@ -29,4 +30,19 @@ func (r *userUserRoleService) AddUserRole(ctx context.Context, tx *gorm.DB, user
 	}
 	err := db.Create(&userUserRole).Error
 	return err
+}
+
+func (r *userUserRoleService) GetRolesByUserID(ctx context.Context, userID uint) ([]model.Role, error) {
+	var (
+		roles []model.Role
+		err   error
+	)
+	sql := `
+		select roles.id, roles.name, roles.code, roles.alias from roles 
+		join user_roles on roles.id = user_roles.role_id
+		where roles.deleted_at is null 
+		and user_roles.user_id = ?
+	`
+	err = r.gormDB.Raw(sql, userID).Find(&roles).Error
+	return roles, err
 }
