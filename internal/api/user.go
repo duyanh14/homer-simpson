@@ -101,3 +101,27 @@ func (h *userRouter) listPermission() gin.HandlerFunc {
 		ctx.OKResponse(pers)
 	})
 }
+
+func (h *userRouter) checkAccess() gin.HandlerFunc {
+	return helper.WithContext(func(ctx *helper.ContextGin) {
+		var (
+			req = dto.CheckAccessReqDTO{}
+			log = logger.GetLogger()
+		)
+		// err := ctx.Query("code")
+		// if err != nil {
+		// 	log.Error("check access, error while bind json %v", err)
+		// 	ctx.BadRequest(err)
+		// 	return
+		// }
+		req.PermissionCode = ctx.Query("code")
+		resp, err := h.userUsecase.CheckAccess(ctx, req)
+		if err != nil {
+			log.Error("check access, error %w", err)
+			ctx.BadLogic(err)
+			return
+		}
+		ctx.OKResponse(resp)
+	})
+
+}

@@ -11,6 +11,7 @@ import (
 	"simpson/internal/service"
 	"simpson/internal/service/model"
 	"simpson/internal/usecase/validation"
+	"simpson/internal/utils"
 	"strings"
 
 	"gorm.io/gorm"
@@ -30,6 +31,7 @@ type UserUsecase interface {
 	Verify(ctx context.Context, req dto.UserVerifyDTO) error
 	Login(ctx context.Context, req dto.UserLoginReqDTO) (dto.UserLoginRespDTO, error)
 	GetPermissions(ctx context.Context) ([]string, error)
+	CheckAccess(ctx context.Context, req dto.CheckAccessReqDTO) (dto.CheckAccessRespDTO, error)
 }
 
 func NewUserUsecase(
@@ -192,7 +194,7 @@ func (u *userUsecase) GetPermissions(ctx context.Context) ([]string, error) {
 		roleIDs = append(roleIDs, fmt.Sprintf("%d", role.ID))
 	}
 	strRole := strings.Join(roleIDs, ",")
-	fmt.Println(strRole)
+	// fmt.Println(strRole)
 	persModel, err := u.rolePermissionService.GetPermissionsByRoleIDs(ctx, strRole)
 	if err != nil {
 		log.Errorf("get list permission of roles %s, error  %v", strRole, err)
@@ -203,4 +205,23 @@ func (u *userUsecase) GetPermissions(ctx context.Context) ([]string, error) {
 		pers[i] = permission.Code
 	}
 	return pers, err
+}
+
+func (u *userUsecase) CheckAccess(ctx context.Context, req dto.CheckAccessReqDTO) (dto.CheckAccessRespDTO, error) {
+	var (
+		resp = dto.CheckAccessRespDTO{}
+		err  error
+		log  = logger.GetLogger()
+	)
+	log.Info("checking access of user")
+	if req.PermissionCode == "" {
+		return resp, common.ErrCodeAccessRequire
+	}
+	listPerCode, err := u.GetPermissions(ctx)
+	if err != nil {
+		log.Error("check access, err", err)
+		return resp, err
+	}
+	resp.IsAccess = utils.FindStringInArray(listPerCode, req.PermissionCode)
+	return resp, err
 }

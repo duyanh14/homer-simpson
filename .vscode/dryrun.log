@@ -1,0 +1,26 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/Users/ducnp/src/homer-simpson'
+mkdir -p cmd
+mkdir -p cmd/worker
+mkdir -p cmd/server
+mkdir -p config
+mkdir -p db
+mkdir -p docs
+mkdir -p genproto
+mkdir -p internal
+mkdir -p internal/adapter
+mkdir -p internal/facade
+mkdir -p internal/api
+mkdir -p internal/common
+mkdir -p internal/dto
+mkdir -p internal/helper
+mkdir -p internal/registry
+mkdir -p internal/service
+ 
+mkdir -p internal/usecase
+mkdir -p internal/utils
+mkdir -p thirdparty
+mkdir -p proto
+mkdir -p sql
+make: Leaving directory `/Users/ducnp/src/homer-simpson'
+ 

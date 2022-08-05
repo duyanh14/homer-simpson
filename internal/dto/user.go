@@ -20,3 +20,12 @@ type (
 		Jwt string `json:"jwt"`
 	}
 )
+
+type (
+	CheckAccessRespDTO struct {
+		IsAccess bool `json:"is_access"`
+	}
+	CheckAccessReqDTO struct {
+		PermissionCode string `json:"code"`
+	}
+)

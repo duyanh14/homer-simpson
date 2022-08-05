@@ -15,6 +15,7 @@ type Usecase struct {
 	RoleUsecase           RoleUsecase
 	UserRoleUsecase       UserRoleUsecase
 	RolePermissionUsecase RolePermissionUsecase
+	AccessUsecase         AccessUsecase
 }
 
 func InitUsecase(ctx context.Context, repo service.Service, cfg *config.Config) (*Usecase, error) {
@@ -31,6 +32,7 @@ func InitUsecase(ctx context.Context, repo service.Service, cfg *config.Config) 
 	permissionUsecase := NewPermissionUsecase(cfg, repo.NewPermissionService(), repo.NewRolePermisiosnService(), repo.NewUserRoleService())
 	userRoleUsecase := NewUserRoleUsecase(cfg, repo.NewUserRoleService(), repo.NewCommonService(), repo.NewUserService(), repo.NewRoleService())
 	rolePerUsecase := NewRolePermissionUsecase(cfg, repo.NewRolePermisiosnService(), repo.NewCommonService(), repo.NewPermissionService(), repo.NewRoleService())
+	accessUsecase := NewAccessUsecase(cfg, repo.NewAccessService())
 
 	return &Usecase{
 		UserUsecase:           userUsecase,
@@ -40,5 +42,6 @@ func InitUsecase(ctx context.Context, repo service.Service, cfg *config.Config) 
 		RoleUsecase:           roleUsecase,
 		UserRoleUsecase:       userRoleUsecase,
 		RolePermissionUsecase: rolePerUsecase,
+		AccessUsecase:         accessUsecase,
 	}, nil
 }

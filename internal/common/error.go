@@ -10,6 +10,8 @@ var (
 	ErrTokenInvalid        = errors.New("token invalid")
 	ErrUserNotFound        = errors.New("user not found")
 	ErrUserIDNotFoundInJwt = errors.New("get userid in jwt failed")
+	ErrCodeAccessRequire   = errors.New("permisison code access require")
+
 	// role
 	ErrRoleNotFound    = errors.New("role not found")
 	ErrRoleCodeRequire = errors.New("role code is required")
@@ -17,6 +19,9 @@ var (
 	// permisson
 	ErrPermisisonNotFound    = errors.New("permisison not found")
 	ErrPermissionCodeRequire = errors.New("permisison code is required")
+
+	// accept
+	ErrAccessTypeRequire = errors.New("accept type is required")
 )
 
 var ErrorCodeValue = map[error]string{
@@ -26,11 +31,14 @@ var ErrorCodeValue = map[error]string{
 	ErrTokenInvalid:        "-101",
 	ErrUserNotFound:        "-102",
 	ErrUserIDNotFoundInJwt: "-103",
+	ErrCodeAccessRequire:   "-104",
 
 	ErrRoleNotFound: "-200",
 
 	ErrPermisisonNotFound:    "-300",
 	ErrPermissionCodeRequire: "-301",
+
+	ErrAccessTypeRequire: "-400",
 }
 
 func ErrorMessage(err error) string {

@@ -15,6 +15,7 @@ type Service interface {
 	NewCommonService() CommonService
 	NewUserRoleService() UserRoleService
 	NewRolePermisiosnService() RolePermissionService
+	NewAccessService() AccessService
 }
 type service struct {
 	gorm *gorm.DB
@@ -54,6 +55,10 @@ func (r *service) NewPermissionService() PermissionService {
 
 func (r *service) NewRoleService() RoleService {
 	return NewRoleService(r.gorm)
+}
+
+func (r *service) NewAccessService() AccessService {
+	return NewAccessService(r.gorm)
 }
 
 func (r *service) NewCommonService() CommonService {
