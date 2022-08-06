@@ -121,6 +121,7 @@ func (h *userRouter) checkAccess() gin.HandlerFunc {
 			ctx.BadLogic(err)
 			return
 		}
+		log.Info("checking access success", resp.IsAccess)
 		ctx.OKResponse(resp)
 	})
 

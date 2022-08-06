@@ -213,7 +213,7 @@ func (u *userUsecase) CheckAccess(ctx context.Context, req dto.CheckAccessReqDTO
 		err  error
 		log  = logger.GetLogger()
 	)
-	log.Info("checking access of user")
+	//	log.Info("checking access of user")
 	if req.PermissionCode == "" {
 		return resp, common.ErrCodeAccessRequire
 	}
