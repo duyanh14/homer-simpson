@@ -2,3 +2,4 @@
 vendor
 thirdparty
 .env
+config/config.go

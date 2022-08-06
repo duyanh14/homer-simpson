@@ -67,3 +67,9 @@ buildlinux:
 
 deps:
 	docker-compose -f docker-compose.yml up -d
+
+build:
+	docker build -t simpson .
+
+run:
+	docker run -it --name=simpson -p 8080:8080 -h 0.0.0.0 -d simpson

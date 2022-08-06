@@ -33,6 +33,7 @@ func (h *accessRouter) addAccess() gin.HandlerFunc {
 			ctx.BadRequest(err)
 			return
 		}
+
 		err = h.accessUsecase.AddAccess(ctx, req)
 		if err != nil {
 			log.Error("add access, error %w", err)
