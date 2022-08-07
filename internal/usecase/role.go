@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"simpson/config"
 	"simpson/internal/common"
 	"simpson/internal/dto"
@@ -10,6 +11,7 @@ import (
 	"simpson/internal/service/model"
 	"strings"
 
+	"github.com/jackc/pgconn"
 	"gorm.io/gorm"
 )
 
@@ -113,14 +115,23 @@ func (u *roleUsecase) UpdateRole(ctx context.Context, req dto.UpdateRoleReqDTO) 
 		Description: req.Description,
 		CreatedBy:   userID,
 	})
+
 	if err != nil {
 		log.Errorf("update role, error while call database error %v", err)
+		var perr *pgconn.PgError
+		if errors.As(err, &perr) && perr.Code == common.DuplicateKeyValue {
+			return common.ErrRoleCodeIsExists
+		}
 		return common.ErrDatabase
 	}
 	if rowaffected == 0 {
 		return common.ErrRecordNotFound
 	}
 	return nil
+}
+
+type ErrorC struct {
+	Code string
 }
 
 func (u *roleUsecase) DeleteRole(ctx context.Context, req dto.DeleteRoleReqDTO) error {
@@ -143,3 +154,5 @@ func (u *roleUsecase) DeleteRole(ctx context.Context, req dto.DeleteRoleReqDTO) 
 	}
 	return nil
 }
+
+//

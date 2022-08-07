@@ -14,6 +14,7 @@ type PermissionService interface {
 	AddPermission(ctx context.Context, permission model.Permission) error
 	// get list permission of userID
 	GetPermissionsUserId(ctx context.Context, userID uint) ([]model.Permission, error)
+	GetPermissioByCode(ctx context.Context, code string) (model.Permission, error)
 	GetPermissionByID(ctx context.Context, tx *gorm.DB, id uint) (model.Permission, error)
 	// management
 	ListPermission(ctx context.Context) ([]model.Permission, error)
@@ -48,6 +49,19 @@ func (r *permissionService) GetPermissionByID(ctx context.Context, tx *gorm.DB, 
 		return per, err
 	}
 	return per, nil
+}
+
+func (r *permissionService) GetPermissioByCode(ctx context.Context, code string) (model.Permission, error) {
+	var (
+		per model.Permission
+		err error
+	)
+	db := r.gormDB
+	err = db.Table(per.Table()).Where("code = ?", code).First(&per).Error
+	if err != nil {
+		return per, err
+	}
+	return per, err
 }
 
 func (r *permissionService) GetPermissionsUserId(ctx context.Context, userID uint) ([]model.Permission, error) {

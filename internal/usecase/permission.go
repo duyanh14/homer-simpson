@@ -2,6 +2,7 @@ package usecase
 
 import (
 	"context"
+	"errors"
 	"simpson/config"
 	"simpson/internal/common"
 	"simpson/internal/dto"
@@ -10,6 +11,7 @@ import (
 	"simpson/internal/service/model"
 	"strings"
 
+	"github.com/jackc/pgconn"
 	"gorm.io/gorm"
 )
 
@@ -154,6 +156,10 @@ func (u *permissionUsecase) UpdateRole(ctx context.Context, req dto.UpdatePermis
 	})
 	if err != nil {
 		log.Errorf("update permission, error while call database error %v", err)
+		var perr *pgconn.PgError
+		if errors.As(err, &perr) && perr.Code == common.DuplicateKeyValue {
+			return common.ErrPermissionCodeIsExists
+		}
 		return common.ErrDatabase
 	}
 	if rowaffected == 0 {

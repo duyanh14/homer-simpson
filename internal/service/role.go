@@ -13,6 +13,7 @@ type roleService struct {
 type RoleService interface {
 	AddRole(ctx context.Context, role model.Role) error
 	GetRoleByID(ctx context.Context, tx *gorm.DB, id uint) (model.Role, error)
+	GetRoleByCode(ctx context.Context, code string) (model.Role, error)
 	// management
 	ListRole(ctx context.Context) ([]model.Role, error)
 	DeleteRole(ctx context.Context, roleID uint) (int64, error)
@@ -68,6 +69,19 @@ func (r *roleService) GetRoleByID(ctx context.Context, tx *gorm.DB, id uint) (mo
 		db = r.gormDB
 	}
 	err = db.Table(role.Table()).Where("id = ?", id).First(&role).Error
+	if err != nil {
+		return role, err
+	}
+	return role, nil
+}
+
+func (r *roleService) GetRoleByCode(ctx context.Context, code string) (model.Role, error) {
+	var (
+		role model.Role
+		err  error
+	)
+	db := r.gormDB
+	err = db.Table(role.Table()).Where("code = ?", code).First(&role).Error
 	if err != nil {
 		return role, err
 	}
