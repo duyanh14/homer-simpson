@@ -41,9 +41,71 @@ func (h *roleRouter) addRole() gin.HandlerFunc {
 		}
 		ctx.OKResponse(nil)
 	})
+}
 
+func (h *roleRouter) updateRole() gin.HandlerFunc {
+	return helper.WithContext(func(ctx *helper.ContextGin) {
+		var (
+			req = dto.UpdateRoleReqDTO{}
+			log = logger.GetLogger()
+		)
+		err := ctx.ShouldBindJSON(&req)
+		if err != nil {
+			log.Error("update role, error while bind json %v", err)
+			ctx.BadRequest(err)
+			return
+		}
+		err = h.roleUsecase.UpdateRole(ctx, req)
+		if err != nil {
+			log.Error("update role, error %w", err)
+			ctx.BadLogic(err)
+			return
+		}
+		ctx.OKResponse(nil)
+	})
+}
+
+func (h *roleRouter) listRole() gin.HandlerFunc {
+	return helper.WithContext(func(ctx *helper.ContextGin) {
+		var (
+			req  = dto.ListRoleReqDTO{}
+			resp = []dto.Role{}
+			log  = logger.GetLogger()
+		)
+		err := ctx.ShouldBindJSON(&req)
+		if err != nil {
+			log.Error("list role, error while bind json %v", err)
+			ctx.BadRequest(err)
+			return
+		}
+		resp, err = h.roleUsecase.ListRole(ctx, req)
+		if err != nil {
+			log.Error("list role, error %w", err)
+			ctx.BadLogic(err)
+			return
+		}
+		ctx.OKResponse(resp)
+	})
 }
 
 func (h *roleRouter) deleteRole() gin.HandlerFunc {
-	return func(ctx *gin.Context) {}
+	return helper.WithContext(func(ctx *helper.ContextGin) {
+		var (
+			req = dto.DeleteRoleReqDTO{}
+			log = logger.GetLogger()
+		)
+		err := ctx.ShouldBindJSON(&req)
+		if err != nil {
+			log.Error("delete role, error while bind json %v", err)
+			ctx.BadRequest(err)
+			return
+		}
+		err = h.roleUsecase.DeleteRole(ctx, req)
+		if err != nil {
+			log.Error("delete role, error %w", err)
+			ctx.BadLogic(err)
+			return
+		}
+		ctx.OKResponse(nil)
+	})
 }

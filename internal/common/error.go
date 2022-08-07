@@ -3,8 +3,9 @@ package common
 import "errors"
 
 var (
-	ErrCommon   = errors.New("common error")
-	ErrDatabase = errors.New("database error")
+	ErrCommon         = errors.New("common error")
+	ErrDatabase       = errors.New("database error")
+	ErrRecordNotFound = errors.New("record not found")
 	// user
 	ErrTokenExpired        = errors.New("token expired")
 	ErrTokenInvalid        = errors.New("token invalid")
@@ -15,6 +16,7 @@ var (
 	// role
 	ErrRoleNotFound    = errors.New("role not found")
 	ErrRoleCodeRequire = errors.New("role code is required")
+	ErrRoleIdRequire   = errors.New("role id is required")
 
 	// permisson
 	ErrPermisisonNotFound    = errors.New("permisison not found")
@@ -25,15 +27,19 @@ var (
 )
 
 var ErrorCodeValue = map[error]string{
-	ErrCommon:              "-1",
-	ErrDatabase:            "-2",
+	ErrCommon:         "-1",
+	ErrDatabase:       "-2",
+	ErrRecordNotFound: "-3",
+
 	ErrTokenExpired:        "-100",
 	ErrTokenInvalid:        "-101",
 	ErrUserNotFound:        "-102",
 	ErrUserIDNotFoundInJwt: "-103",
 	ErrCodeAccessRequire:   "-104",
 
-	ErrRoleNotFound: "-200",
+	ErrRoleNotFound:    "-200",
+	ErrRoleCodeRequire: "-201",
+	ErrRoleIdRequire:   "-202",
 
 	ErrPermisisonNotFound:    "-300",
 	ErrPermissionCodeRequire: "-301",
