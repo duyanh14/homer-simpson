@@ -15,6 +15,10 @@ type PermissionService interface {
 	// get list permission of userID
 	GetPermissionsUserId(ctx context.Context, userID uint) ([]model.Permission, error)
 	GetPermissionByID(ctx context.Context, tx *gorm.DB, id uint) (model.Permission, error)
+	// management
+	ListPermission(ctx context.Context) ([]model.Permission, error)
+	DeletePermission(ctx context.Context, permissionID uint) (int64, error)
+	UploadPermission(ctx context.Context, role model.Permission) (int64, error)
 }
 
 func NewPermissionService(
@@ -61,4 +65,30 @@ func (r *permissionService) GetPermissionsUserId(ctx context.Context, userID uin
 	`
 	r.gormDB.Exec(sql)
 	return pers, err
+}
+
+func (r *permissionService) ListPermission(ctx context.Context) ([]model.Permission, error) {
+	var (
+		permissions = []model.Permission{}
+		err         error
+	)
+	err = r.gormDB.Table(model.Permission{}.Table()).Find(&permissions).Error
+	return permissions, err
+}
+
+func (r *permissionService) DeletePermission(ctx context.Context, permissionID uint) (int64, error) {
+	permission := model.Permission{}
+	deleteDB := r.gormDB.Table(permission.Table()).Where("id = ?", permissionID).Delete(&permission)
+	if err := deleteDB.Error; err != nil {
+		return 0, err
+	}
+	return deleteDB.RowsAffected, nil
+}
+
+func (r *permissionService) UploadPermission(ctx context.Context, permission model.Permission) (int64, error) {
+	updateDB := r.gormDB.Table(permission.Table()).Where("id = ?", permission.ID).Updates(permission.ColumnUpdate())
+	if err := updateDB.Error; err != nil {
+		return 0, err
+	}
+	return updateDB.RowsAffected, nil
 }

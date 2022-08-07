@@ -21,6 +21,7 @@ var (
 	// permisson
 	ErrPermisisonNotFound    = errors.New("permisison not found")
 	ErrPermissionCodeRequire = errors.New("permisison code is required")
+	ErrPermissionIdRequire   = errors.New("permisison id is required")
 
 	// accept
 	ErrAccessTypeRequire = errors.New("accept type is required")
@@ -43,6 +44,7 @@ var ErrorCodeValue = map[error]string{
 
 	ErrPermisisonNotFound:    "-300",
 	ErrPermissionCodeRequire: "-301",
+	ErrPermissionIdRequire:   "-302",
 
 	ErrAccessTypeRequire: "-400",
 }

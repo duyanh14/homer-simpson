@@ -14,3 +14,23 @@ type Permission struct {
 func (u Permission) Table() string {
 	return "permissions"
 }
+
+func (role Permission) ColumnUpdate() map[string]interface{} {
+	fieldUpdate := make(map[string]interface{})
+	if role.Alias != "" {
+		fieldUpdate["alias"] = role.Alias
+	}
+	if role.Name != "" {
+		fieldUpdate["name"] = role.Name
+	}
+	if role.Code != "" {
+		fieldUpdate["code"] = role.Code
+	}
+	if role.Description != "" {
+		fieldUpdate["description"] = role.Description
+	}
+	if role.CreatedBy != 0 {
+		fieldUpdate["created_by"] = role.CreatedBy
+	}
+	return fieldUpdate
+}
