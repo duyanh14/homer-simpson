@@ -57,6 +57,10 @@ func (u *roleUsecase) AddRole(ctx context.Context, req dto.AddRoleReqDTO) error 
 	})
 	if err != nil {
 		log.Errorf("add role, error while call database error %v", err)
+		var perr *pgconn.PgError
+		if errors.As(err, &perr) && perr.Code == common.DuplicateKeyValue {
+			return common.ErrRoleCodeIsExists
+		}
 		return common.ErrDatabase
 	}
 	return nil
