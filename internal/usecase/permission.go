@@ -97,8 +97,10 @@ func (u *permissionUsecase) AddPermission(ctx context.Context, req dto.AddPermis
 	if err != nil {
 		log.Errorf("add permission, error while call database error %v", err)
 		var perr *pgconn.PgError
-		if errors.As(err, &perr) && perr.Code == common.DuplicateKeyValue {
-			return common.ErrPermissionCodeIsExists
+		if errors.As(err, &perr) {
+			if perr.Code == common.DuplicateKeyValue {
+				return common.ErrPermissionCodeIsExists
+			}
 		}
 		return common.ErrDatabase
 	}

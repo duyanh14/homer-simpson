@@ -2,5 +2,5 @@
 vendor
 thirdparty
 .env
-config/config.go
+# config/config.go
 loadtest/__pycache*
