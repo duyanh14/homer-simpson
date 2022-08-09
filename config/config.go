@@ -14,9 +14,9 @@ cors_local: true
 http_address: 8080
 postgres:
   username: postgres
-  password: postgres
+  password: duc123456
   database: postgres
-  host: localhost
+  host: homer-simpson.cf0yk1w6aenj.us-east-1.rds.amazonaws.com
   port: 5432
   migrate: true
 admin_dev:

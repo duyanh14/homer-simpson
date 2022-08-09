@@ -69,7 +69,8 @@ func (s *Server) Init(ctx context.Context) error {
 	// init cache redis
 	cacheI, err := cache.NewRedisInstance(ctx, cfg.Redis)
 	if err != nil {
-		return err
+		err = nil
+		// return err
 	}
 	fmt.Println(cacheI)
 
