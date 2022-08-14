@@ -7,6 +7,13 @@ import (
 	"gorm.io/gorm"
 )
 
+const (
+	// status of query, get all, get record deleted, get record not delete
+	GetActive = iota
+	GetDeActive
+	GetAll
+)
+
 type Service interface {
 	NewUserService() UserService
 	NewPartnerService() PartnerService
@@ -18,15 +25,17 @@ type Service interface {
 	NewAccessService() AccessService
 }
 type service struct {
-	gorm *gorm.DB
+	gorm    *gorm.DB
+	isDebug bool
 }
 
-func InitService(ctx context.Context, db *gorm.DB) (Service, error) {
+func InitService(ctx context.Context, db *gorm.DB, idDebug bool) (Service, error) {
 	if db == nil {
 		return nil, errors.New("database init nil")
 	}
 	return &service{
-		gorm: db,
+		gorm:    db,
+		isDebug: idDebug,
 	}, nil
 }
 func (r *service) BuildTransaction(ctx context.Context) *gorm.DB {
@@ -54,7 +63,7 @@ func (r *service) NewPermissionService() PermissionService {
 }
 
 func (r *service) NewRoleService() RoleService {
-	return NewRoleService(r.gorm)
+	return NewRoleService(r.gorm, r.isDebug)
 }
 
 func (r *service) NewAccessService() AccessService {
@@ -84,4 +93,17 @@ func NewCommonService(
 	return &commonService{
 		gormDB: db,
 	}
+}
+
+func AppendSql(db *gorm.DB, debug bool, actionRecord int) *gorm.DB {
+	if debug {
+		db = db.Debug()
+	}
+	if actionRecord == GetActive {
+		return db
+	}
+	if actionRecord == GetDeActive {
+		return db.Unscoped().Where("deleted_at IS NOT NULL")
+	}
+	return db.Unscoped()
 }

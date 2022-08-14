@@ -72,7 +72,7 @@ func (u *roleUsecase) ListRole(ctx context.Context, req dto.ListRoleReqDTO) ([]d
 		err  error
 		log  = logger.GetLogger()
 	)
-	rolesModel, err := u.roleService.ListRole(ctx)
+	rolesModel, err := u.roleService.ListRole(ctx, service.GetDeActive)
 	if err != nil {
 		log.Errorf("get list role, error while call database error %v", err)
 		return resp, common.ErrDatabase
@@ -88,6 +88,7 @@ func (u *roleUsecase) ListRole(ctx context.Context, req dto.ListRoleReqDTO) ([]d
 			CreatedBy:   item.CreatedBy,
 			UpdatedAt:   item.UpdatedAt,
 			CreatedAt:   item.CreatedAt,
+			DeletedAt:   item.DeletedAt.Time,
 		}
 		resp[i] = roletemp
 	}

@@ -72,4 +72,7 @@ build:
 	docker build -t simpson .
 
 run:
-	docker run -it -m 512m --cpus=1  --name=simpson -p 8080:8080 -h 0.0.0.0 -d simpson
+	docker run -it -m 256m --cpus=0.5  --name=simpson -p 8080:8080 -d simpson
+
+loadtest:
+	locust -f index.py

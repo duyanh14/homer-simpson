@@ -126,3 +126,19 @@ func (h *userRouter) checkAccess() gin.HandlerFunc {
 	})
 
 }
+
+func (h *userRouter) userInfo() gin.HandlerFunc {
+	return helper.WithContext(func(ctx *helper.ContextGin) {
+		var (
+			req = dto.UserInfoReqDTO{}
+			log = logger.GetLogger()
+		)
+		resp, err := h.userUsecase.UserInfo(ctx, req)
+		if err != nil {
+			log.Error("get user info, error %w", err)
+			ctx.BadLogic(err)
+			return
+		}
+		ctx.OKResponse(resp)
+	})
+}

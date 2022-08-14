@@ -13,7 +13,7 @@ type (
 		Password string `json:"password"`
 	}
 	UserLoginRespDTO struct {
-		Jwt string `json:"jwt"`
+		Jwt string `json:"jwt_str"`
 	}
 
 	UserVerifyDTO struct {
@@ -23,9 +23,26 @@ type (
 
 type (
 	CheckAccessRespDTO struct {
-		IsAccess bool `json:"is_access"`
+		Message     string   `json:"message"`
+		IsAccess    bool     `json:"is_access"`
+		Permissions []string `json:"permissions"`
 	}
 	CheckAccessReqDTO struct {
 		PermissionCode string `json:"code"`
+	}
+
+	UserListPermission struct {
+		Permissions []string `json:"permissions"`
+	}
+)
+
+type (
+	UserInfoRespDTO struct {
+		Phone    string `json:"phone"`
+		Email    string `json:"email"`
+		Username string `json:"user_name"`
+	}
+
+	UserInfoReqDTO struct {
 	}
 )

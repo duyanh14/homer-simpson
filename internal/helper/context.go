@@ -11,7 +11,7 @@ type ContextGin struct {
 	*gin.Context
 }
 type ResponseData struct {
-	StatusCode string      `json:"status"`
+	StatusCode string      `json:"status_code"`
 	Message    string      `json:"message,omitempty"`
 	Code       string      `json:"code,omitempty"`
 	Data       interface{} `json:"data,omitempty"`

@@ -7,18 +7,18 @@ import (
 	"github.com/spf13/viper"
 )
 
-//  ssh -N -L 3336:127.0.0.1:3306 ducnp09081998@85.10.205.173
 var yamlConfig = []byte(`
 db_migration_data: false
 cors_local: true
 http_address: 8080
 postgres:
   username: postgres
-  password: duc123456
+  password: postgres
   database: postgres
-  host: homer-simpson.cf0yk1w6aenj.us-east-1.rds.amazonaws.com
+  host: localhost
   port: 5432
   migrate: true
+  is_debug: true
 admin_dev:
   - ducnp
   - dev
@@ -34,6 +34,7 @@ jwt:
   long_token_expire: 216000
   short_token_expire: 21600
   issuer: "simpson"
+  validate_password: false
 redis_setting:
   addrs:
   - redis-14409.c1.ap-southeast-1-1.ec2.cloud.redislabs.com:14409
@@ -80,6 +81,7 @@ type (
 		LongTokenExpireTime    uint32 `yaml:"long_token_expire" mapstructure:"long_token_expire"`
 		ShortTokenExpireTime   uint32 `yaml:"short_token_expire" mapstructure:"short_token_expire"`
 		IsRefreshToken         bool   `yaml:"is_refresh_token" mapstructure:"is_refresh_token"`
+		ValidatePassword       bool   `yaml:"validate_password" mapstructure:"validate_password"`
 	}
 
 	// Postgres
@@ -93,6 +95,7 @@ type (
 		MaxIdleConn int    `yaml:"max_idle_conn" mapstructure:"max_idle_conn"`
 		MaxOpenConn int    `yaml:"max_open_conn" mapstructure:"max_open_conn"`
 		MaxLifeTime int    `yaml:"max_life_time" mapstructure:"max_life_time"` // hour
+		IsDebug     bool   `yaml:"is_debug" mapstructure:"is_debug"`
 	}
 
 	Redis struct {

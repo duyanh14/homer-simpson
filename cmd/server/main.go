@@ -78,7 +78,7 @@ func (s *Server) Init(ctx context.Context) error {
 
 	s.initCors(ctx)
 
-	repo, err := service.InitService(ctx, dbPostgres)
+	repo, err := service.InitService(ctx, dbPostgres, s.cfg.Postgres.IsDebug)
 	if err != nil {
 		return err
 	}

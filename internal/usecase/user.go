@@ -30,8 +30,9 @@ type UserUsecase interface {
 	Register(ctx context.Context, req dto.UserDTO) error
 	Verify(ctx context.Context, req dto.UserVerifyDTO) error
 	Login(ctx context.Context, req dto.UserLoginReqDTO) (dto.UserLoginRespDTO, error)
-	GetPermissions(ctx context.Context) ([]string, error)
+	GetPermissions(ctx context.Context) (dto.UserListPermission, error)
 	CheckAccess(ctx context.Context, req dto.CheckAccessReqDTO) (dto.CheckAccessRespDTO, error)
+	UserInfo(ctx context.Context, req dto.UserInfoReqDTO) (dto.UserInfoRespDTO, error)
 }
 
 func NewUserUsecase(
@@ -57,10 +58,12 @@ func (u *userUsecase) Register(ctx context.Context, req dto.UserDTO) error {
 		log = logger.GetLogger()
 		err error
 	)
-
-	if err = validation.ValidatorPw(req.Password); err != nil {
-		log.Error("passwrd not security, err %s", err)
-		return err
+	if u.config.JWT.ValidatePassword {
+		err = validation.ValidatorPw(req.Password)
+		if err != nil {
+			log.Error("passwrd not security, err %s", err)
+			return err
+		}
 	}
 
 	if req.Username == "" {
@@ -169,26 +172,27 @@ func (u *userUsecase) Verify(ctx context.Context, req dto.UserVerifyDTO) error {
 	return nil
 }
 
-func (u *userUsecase) GetPermissions(ctx context.Context) ([]string, error) {
+func (u *userUsecase) GetPermissions(ctx context.Context) (dto.UserListPermission, error) {
 	var (
 		pers    []string
 		err     error
 		log     = logger.GetLogger()
 		roleIDs []string
+		resp    = dto.UserListPermission{}
 	)
 	userID := ctx.Value("user_id").(uint)
 	if userID == 0 {
-		return pers, common.ErrUserIDNotFoundInJwt
+		return resp, common.ErrUserIDNotFoundInJwt
 	}
 
 	roles, err := u.userRoleService.GetRolesByUserID(ctx, userID)
 	if err != nil {
 		log.Errorf("get list role of userID %d, error  %v", userID, err)
-		return pers, common.ErrDatabase
+		return resp, common.ErrDatabase
 	}
 	if len(roles) == 0 {
 		log.Errorf("get list permission, roles of userID %d not found ", userID)
-		return pers, common.ErrPermisisonNotFound
+		return resp, common.ErrPermisisonNotFound
 	}
 	for _, role := range roles {
 		roleIDs = append(roleIDs, fmt.Sprintf("%d", role.ID))
@@ -198,13 +202,14 @@ func (u *userUsecase) GetPermissions(ctx context.Context) ([]string, error) {
 	persModel, err := u.rolePermissionService.GetPermissionsByRoleIDs(ctx, strRole)
 	if err != nil {
 		log.Errorf("get list permission of roles %s, error  %v", strRole, err)
-		return pers, common.ErrDatabase
+		return resp, common.ErrDatabase
 	}
 	pers = make([]string, len(persModel))
 	for i, permission := range persModel {
 		pers[i] = permission.Code
 	}
-	return pers, err
+	resp.Permissions = pers
+	return resp, err
 }
 
 func (u *userUsecase) CheckAccess(ctx context.Context, req dto.CheckAccessReqDTO) (dto.CheckAccessRespDTO, error) {
@@ -222,6 +227,35 @@ func (u *userUsecase) CheckAccess(ctx context.Context, req dto.CheckAccessReqDTO
 		log.Error("check access, err", err)
 		return resp, err
 	}
-	resp.IsAccess = utils.FindStringInArray(listPerCode, req.PermissionCode)
+	resp.IsAccess = utils.FindStringInArray(listPerCode.Permissions, req.PermissionCode)
+	if !resp.IsAccess {
+		userName, ok := ctx.Value("user_name").(string)
+		if ok {
+			resp.Message = fmt.Sprintf("user %s not access with permssion %s", userName, req.PermissionCode)
+		}
+	}
+	resp.Permissions = listPerCode.Permissions
+	return resp, err
+}
+
+func (u *userUsecase) UserInfo(ctx context.Context, req dto.UserInfoReqDTO) (dto.UserInfoRespDTO, error) {
+	var (
+		resp = dto.UserInfoRespDTO{}
+		err  error
+		log  = logger.GetLogger()
+	)
+	userID := ctx.Value("user_id").(uint)
+	if userID == 0 {
+		return resp, common.ErrUserIDNotFoundInJwt
+	}
+
+	userModel, err := u.userService.GetUserByID(ctx, nil, userID)
+	if err != nil {
+		log.Error("get user info err:", err)
+		return resp, common.ErrDatabase
+	}
+	resp.Email = userModel.Username
+	resp.Phone = userModel.Phone
+	resp.Username = userModel.Username
 	return resp, err
 }

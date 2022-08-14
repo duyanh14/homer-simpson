@@ -11,7 +11,7 @@ type Role struct {
 	CreatedBy   uint      `json:"created_by"`
 	CreatedAt   time.Time `json:"created_at"`
 	UpdatedAt   time.Time `json:"updated_at"`
-	// DeletedAt   time.Time `json:"deleted_at"`
+	DeletedAt   time.Time `json:"deleted_at"`
 }
 type AddRoleReqDTO struct {
 	Name        string `json:"name"`
@@ -20,7 +20,9 @@ type AddRoleReqDTO struct {
 	Description string `json:"description"`
 }
 
-type ListRoleReqDTO struct{}
+type ListRoleReqDTO struct {
+	IsActive bool
+}
 type ListRoleRespDTO struct{}
 
 type UpdateRoleReqDTO struct {

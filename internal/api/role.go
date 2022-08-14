@@ -71,13 +71,19 @@ func (h *roleRouter) listRole() gin.HandlerFunc {
 			req  = dto.ListRoleReqDTO{}
 			resp = []dto.Role{}
 			log  = logger.GetLogger()
+			err  error
 		)
-		err := ctx.ShouldBindJSON(&req)
-		if err != nil {
-			log.Error("list role, error while bind json %v", err)
-			ctx.BadRequest(err)
-			return
+		// TODO
+		req.IsActive = false
+		if active := ctx.Query("active"); active != "" {
+			req.IsActive = true
 		}
+		// err := ctx.ShouldBindJSON(&req)
+		// if err != nil {
+		// 	log.Error("list role, error while bind json %v", err)
+		// 	ctx.BadRequest(err)
+		// 	return
+		// }
 		resp, err = h.roleUsecase.ListRole(ctx, req)
 		if err != nil {
 			log.Error("list role, error %w", err)
