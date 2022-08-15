@@ -7,3 +7,7 @@ type (
 		Description  string `json:"description"`
 	}
 )
+
+type GetListPermissionOfRole struct {
+	RoleId string `json:"role_id"`
+}

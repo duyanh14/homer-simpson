@@ -72,6 +72,7 @@ func (r *roleService) GetRoleByID(ctx context.Context, tx *gorm.DB, id uint) (mo
 	if tx == nil {
 		db = r.gormDB
 	}
+	db = AppendSql(db, r.isDebug, GetAll)
 	err = db.Table(role.Table()).Where("id = ?", id).First(&role).Error
 	if err != nil {
 		return role, err

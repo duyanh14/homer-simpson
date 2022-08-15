@@ -31,7 +31,7 @@ jwt:
   signing_method: RS512
   is_refresh_token: false
   refresh_token_expire: 216000
-  long_token_expire: 216000
+  long_token_expire: 216000000
   short_token_expire: 21600
   issuer: "simpson"
   validate_password: false

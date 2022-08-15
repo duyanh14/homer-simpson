@@ -39,3 +39,12 @@ type DeleteRoleReqDTO struct {
 	RoleID uint `json:"role_id"`
 }
 type DeleteRoleRespDTO struct{}
+
+type (
+	DetailRoleReqDTO struct {
+		RoleID uint `json:"role_id"`
+	}
+
+	DetailRoleRespDTO struct {
+	}
+)

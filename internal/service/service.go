@@ -43,7 +43,7 @@ func (r *service) BuildTransaction(ctx context.Context) *gorm.DB {
 }
 
 func (r *service) NewRolePermisiosnService() RolePermissionService {
-	return NewRolePermissionService(r.gorm)
+	return NewRolePermissionService(r.gorm, r.isDebug)
 }
 
 func (r *service) NewUserRoleService() UserRoleService {

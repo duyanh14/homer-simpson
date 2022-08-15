@@ -9,6 +9,7 @@ import (
 	"simpson/internal/helper/logger"
 	"simpson/internal/service"
 	"simpson/internal/service/model"
+	"strconv"
 
 	"gorm.io/gorm"
 )
@@ -23,6 +24,7 @@ type rolePermissionUsecase struct {
 
 type RolePermissionUsecase interface {
 	AddRolePermission(ctx context.Context, req dto.AddRolePermissionReqDTO) error
+	GetListPermissionOfRole(ctx context.Context, req dto.GetListPermissionOfRole) ([]dto.Permission, error)
 }
 
 func NewRolePermissionUsecase(
@@ -108,5 +110,41 @@ func (u *rolePermissionUsecase) AddRolePermission(ctx context.Context, req dto.A
 		return common.ErrCommon
 	}
 	return nil
+
+}
+
+func (u *rolePermissionUsecase) GetListPermissionOfRole(ctx context.Context,
+	req dto.GetListPermissionOfRole) (listPermission []dto.Permission, err error) {
+	log := logger.GetLogger()
+
+	if req.RoleId == "" {
+		return listPermission, common.ErrRoleIdRequire
+	}
+	roleID, err := (strconv.Atoi(req.RoleId))
+	if err != nil {
+		log.Error("get list permission of role, role id need number, err %v", err)
+		return listPermission, common.ErrRoleIdNeedNumber
+	}
+
+	modelPermissions, err := u.rolePermissionService.GetPermissionsByRoleID(ctx, uint(roleID))
+	if err != nil {
+		log.Error("add list permission of role %s, error while call database err %s", req.RoleId, err)
+		return nil, common.ErrDatabase
+	}
+	listPermission = make([]dto.Permission, len(modelPermissions))
+	for i, item := range modelPermissions {
+		listPermission[i] = dto.Permission{
+			Name:        item.Name,
+			Code:        item.Code,
+			Description: item.Description,
+			Alias:       item.Alias,
+			CreatedAt:   item.CreatedAt,
+			DeletedAt:   item.DeletedAt.Time,
+			UpdatedAt:   item.UpdatedAt,
+			ID:          item.ID,
+			CreatedBy:   item.CreatedBy,
+		}
+	}
+	return listPermission, nil
 
 }

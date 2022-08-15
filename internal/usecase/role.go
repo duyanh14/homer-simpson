@@ -25,6 +25,7 @@ type RoleUsecase interface {
 	ListRole(ctx context.Context, req dto.ListRoleReqDTO) ([]dto.Role, error)
 	UpdateRole(ctx context.Context, req dto.UpdateRoleReqDTO) error
 	DeleteRole(ctx context.Context, req dto.DeleteRoleReqDTO) error
+	DetailRole(ctx context.Context, req dto.DetailRoleReqDTO) (dto.Role, error)
 }
 
 func NewRoleUsecase(
@@ -72,7 +73,7 @@ func (u *roleUsecase) ListRole(ctx context.Context, req dto.ListRoleReqDTO) ([]d
 		err  error
 		log  = logger.GetLogger()
 	)
-	rolesModel, err := u.roleService.ListRole(ctx, service.GetDeActive)
+	rolesModel, err := u.roleService.ListRole(ctx, service.GetAll)
 	if err != nil {
 		log.Errorf("get list role, error while call database error %v", err)
 		return resp, common.ErrDatabase
@@ -93,6 +94,47 @@ func (u *roleUsecase) ListRole(ctx context.Context, req dto.ListRoleReqDTO) ([]d
 		resp[i] = roletemp
 	}
 	return resp, err
+}
+
+func (u *roleUsecase) DetailRole(ctx context.Context, req dto.DetailRoleReqDTO) (dto.Role, error) {
+	var (
+		resp = dto.Role{}
+		err  error
+		log  = logger.GetLogger()
+	)
+	if req.RoleID == 0 {
+		return resp, common.ErrRoleIdRequire
+	}
+	roleModel, err := u.roleService.GetRoleByID(ctx, nil, req.RoleID)
+	if err != nil {
+		log.Errorf("get detail role %d, error while call database error %v", req.RoleID, err)
+		return resp, common.ErrDatabase
+	}
+	resp.ID = roleModel.ID
+	resp.Alias = roleModel.Alias
+	resp.Code = roleModel.Code
+	resp.Description = roleModel.Description
+	resp.Name = roleModel.Name
+	resp.CreatedBy = roleModel.CreatedBy
+	resp.CreatedAt = roleModel.CreatedAt
+	resp.UpdatedAt = roleModel.UpdatedAt
+	resp.DeletedAt = roleModel.DeletedAt.Time
+	return resp, nil
+	// resp = make([]dto.Role, len(rolesModel))
+	// for i, item := range rolesModel {
+	// 	roletemp := dto.Role{
+	// 		ID:          item.ID,
+	// 		Name:        item.Name,
+	// 		Code:        item.Code,
+	// 		Alias:       item.Alias,
+	// 		Description: item.Description,
+	// 		CreatedBy:   item.CreatedBy,
+	// 		UpdatedAt:   item.UpdatedAt,
+	// 		CreatedAt:   item.CreatedAt,
+	// 		DeletedAt:   item.DeletedAt.Time,
+	// 	}
+	// 	resp[i] = roletemp
+	// }
 }
 
 func (u *roleUsecase) UpdateRole(ctx context.Context, req dto.UpdateRoleReqDTO) error {

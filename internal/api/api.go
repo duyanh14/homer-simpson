@@ -21,7 +21,8 @@ func (h *accessRouter) UserAccessRouter(router *gin.RouterGroup) {
 }
 
 func (h *rolePermissionRouter) RolePermissionRouter(router *gin.RouterGroup) {
-	router.POST("/role/permisison", h.addRolePermission())
+	router.POST("/role/permission", h.addRolePermission())
+	router.GET("/role/permissions", h.listPermissionByRole())
 }
 
 func (h *roleRouter) RoleRouter(router *gin.RouterGroup) {
@@ -29,6 +30,7 @@ func (h *roleRouter) RoleRouter(router *gin.RouterGroup) {
 	router.POST("/role", h.addRole())
 	router.GET("/roles", h.listRole())
 	router.PUT("/role", h.updateRole())
+	router.GET("/role", h.detailRole())
 }
 
 func (h *permissionRouter) PermissionRouter(router *gin.RouterGroup) {

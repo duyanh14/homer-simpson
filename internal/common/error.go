@@ -22,6 +22,7 @@ var (
 	ErrRoleNotFound     = errors.New("role not found")
 	ErrRoleCodeRequire  = errors.New("role code is required")
 	ErrRoleIdRequire    = errors.New("role id is required")
+	ErrRoleIdNeedNumber = errors.New("role id is number")
 	ErrRoleCodeIsExists = errors.New("role code is exists")
 
 	// permisson

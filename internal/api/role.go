@@ -5,6 +5,7 @@ import (
 	"simpson/internal/helper"
 	"simpson/internal/helper/logger"
 	"simpson/internal/usecase"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -113,5 +114,31 @@ func (h *roleRouter) deleteRole() gin.HandlerFunc {
 			return
 		}
 		ctx.OKResponse(nil)
+	})
+}
+
+func (h *roleRouter) detailRole() gin.HandlerFunc {
+	return helper.WithContext(func(ctx *helper.ContextGin) {
+		var (
+			req = dto.DetailRoleReqDTO{}
+			// resp = []dto.Role{}
+			log = logger.GetLogger()
+			err error
+		)
+		id := ctx.Query("role_id")
+		roleID, err := strconv.Atoi(id)
+		if err != nil {
+			log.Error("delete role, error while bind json %v", err)
+			ctx.BadRequest(err)
+			return
+		}
+		req.RoleID = uint(roleID)
+		resp, err := h.roleUsecase.DetailRole(ctx, req)
+		if err != nil {
+			log.Error("detail role, error %w", err)
+			ctx.BadLogic(err)
+			return
+		}
+		ctx.OKResponse(resp)
 	})
 }
