@@ -37,3 +37,12 @@ type DeletePermissionReqDTO struct {
 	PermissionID uint `json:"permission_id"`
 }
 type DeletePermissionRespDTO struct{}
+
+type (
+	DetailPermissionReqDTO struct {
+		PermissionID uint `json:"permission_id"`
+	}
+
+	DetailPermissionRespDTO struct {
+	}
+)

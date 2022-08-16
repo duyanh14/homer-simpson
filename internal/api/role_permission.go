@@ -62,3 +62,22 @@ func (h *rolePermissionRouter) listPermissionByRole() gin.HandlerFunc {
 	})
 
 }
+
+func (h *rolePermissionRouter) listRoleByPermission() gin.HandlerFunc {
+	return helper.WithContext(func(ctx *helper.ContextGin) {
+		var (
+			req = dto.GetListRoleOfPermission{}
+			log = logger.GetLogger()
+		)
+
+		req.PermissionID = ctx.Query("permission_id")
+		listPer, err := h.rolePermissionUsecase.GetListRoleOfPermission(ctx, req)
+		if err != nil {
+			log.Error("get list role, error %w", err)
+			ctx.BadLogic(err)
+			return
+		}
+		ctx.OKResponse(listPer)
+	})
+
+}

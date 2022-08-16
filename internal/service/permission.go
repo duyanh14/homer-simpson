@@ -8,7 +8,8 @@ import (
 )
 
 type permissionService struct {
-	gormDB *gorm.DB
+	gormDB  *gorm.DB
+	isDebug bool
 }
 type PermissionService interface {
 	AddPermission(ctx context.Context, permission model.Permission) error
@@ -24,9 +25,11 @@ type PermissionService interface {
 
 func NewPermissionService(
 	db *gorm.DB,
+	isDebug bool,
 ) PermissionService {
 	return &permissionService{
-		gormDB: db,
+		gormDB:  db,
+		isDebug: isDebug,
 	}
 }
 
@@ -44,6 +47,7 @@ func (r *permissionService) GetPermissionByID(ctx context.Context, tx *gorm.DB, 
 	if tx == nil {
 		db = r.gormDB
 	}
+	db = AppendSql(db, r.isDebug, GetAll)
 	err = db.Table(per.Table()).Where("id = ?", id).First(&per).Error
 	if err != nil {
 		return per, err

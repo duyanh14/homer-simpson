@@ -59,7 +59,7 @@ func (r *service) NewPartnerService() PartnerService {
 }
 
 func (r *service) NewPermissionService() PermissionService {
-	return NewPermissionService(r.gorm)
+	return NewPermissionService(r.gorm, r.isDebug)
 }
 
 func (r *service) NewRoleService() RoleService {

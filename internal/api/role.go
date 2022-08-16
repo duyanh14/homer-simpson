@@ -128,7 +128,7 @@ func (h *roleRouter) detailRole() gin.HandlerFunc {
 		id := ctx.Query("role_id")
 		roleID, err := strconv.Atoi(id)
 		if err != nil {
-			log.Error("delete role, error while bind json %v", err)
+			log.Error("get detail role, error while bind json %v", err)
 			ctx.BadRequest(err)
 			return
 		}

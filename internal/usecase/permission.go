@@ -29,6 +29,7 @@ type PermissionUsecase interface {
 	ListPermission(ctx context.Context, req dto.ListPermissionReqDTO) ([]dto.Permission, error)
 	UpdateRole(ctx context.Context, req dto.UpdatePermissionReqDTO) error
 	DeletePermission(ctx context.Context, req dto.DeletePermissionReqDTO) error
+	DetailPermission(ctx context.Context, req dto.DetailPermissionReqDTO) (dto.Permission, error)
 }
 
 func NewPermissionUsecase(
@@ -193,4 +194,33 @@ func (u *permissionUsecase) DeletePermission(ctx context.Context, req dto.Delete
 		return common.ErrRecordNotFound
 	}
 	return nil
+}
+
+func (u *permissionUsecase) DetailPermission(ctx context.Context, req dto.DetailPermissionReqDTO) (dto.Permission, error) {
+	var (
+		resp = dto.Permission{}
+		err  error
+		log  = logger.GetLogger()
+	)
+	if req.PermissionID == 0 {
+		return resp, common.ErrPermissionIdRequire
+	}
+	roleModel, err := u.permissionService.GetPermissionByID(ctx, nil, req.PermissionID)
+	if err == gorm.ErrRecordNotFound {
+		return resp, common.ErrRecordNotFound
+	}
+	if err != nil {
+		log.Errorf("get detail permission %d, error while call database error %v", req.PermissionID, err)
+		return resp, common.ErrDatabase
+	}
+	resp.ID = roleModel.ID
+	resp.Alias = roleModel.Alias
+	resp.Code = roleModel.Code
+	resp.Description = roleModel.Description
+	resp.Name = roleModel.Name
+	resp.CreatedBy = roleModel.CreatedBy
+	resp.CreatedAt = roleModel.CreatedAt
+	resp.UpdatedAt = roleModel.UpdatedAt
+	resp.DeletedAt = roleModel.DeletedAt.Time
+	return resp, nil
 }

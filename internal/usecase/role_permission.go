@@ -25,6 +25,7 @@ type rolePermissionUsecase struct {
 type RolePermissionUsecase interface {
 	AddRolePermission(ctx context.Context, req dto.AddRolePermissionReqDTO) error
 	GetListPermissionOfRole(ctx context.Context, req dto.GetListPermissionOfRole) ([]dto.Permission, error)
+	GetListRoleOfPermission(ctx context.Context, req dto.GetListRoleOfPermission) ([]dto.Role, error)
 }
 
 func NewRolePermissionUsecase(
@@ -146,5 +147,41 @@ func (u *rolePermissionUsecase) GetListPermissionOfRole(ctx context.Context,
 		}
 	}
 	return listPermission, nil
+
+}
+
+func (u *rolePermissionUsecase) GetListRoleOfPermission(ctx context.Context,
+	req dto.GetListRoleOfPermission) (listRole []dto.Role, err error) {
+	log := logger.GetLogger()
+
+	if req.PermissionID == "" {
+		return listRole, common.ErrRoleIdRequire
+	}
+	perID, err := (strconv.Atoi(req.PermissionID))
+	if err != nil {
+		log.Error("get list permission of role, role id need number, err %v", err)
+		return listRole, common.ErrRoleIdNeedNumber
+	}
+
+	modelRoles, err := u.rolePermissionService.GetRolesByPermissionID(ctx, uint(perID))
+	if err != nil {
+		log.Error("add list role of permission %s, error while call database err %s", req.PermissionID, err)
+		return nil, common.ErrDatabase
+	}
+	listRole = make([]dto.Role, len(modelRoles))
+	for i, item := range modelRoles {
+		listRole[i] = dto.Role{
+			Name:        item.Name,
+			Code:        item.Code,
+			Description: item.Description,
+			Alias:       item.Alias,
+			CreatedAt:   item.CreatedAt,
+			DeletedAt:   item.DeletedAt.Time,
+			UpdatedAt:   item.UpdatedAt,
+			ID:          item.ID,
+			CreatedBy:   item.CreatedBy,
+		}
+	}
+	return listRole, nil
 
 }

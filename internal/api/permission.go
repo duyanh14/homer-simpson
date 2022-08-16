@@ -5,6 +5,7 @@ import (
 	"simpson/internal/helper"
 	"simpson/internal/helper/logger"
 	"simpson/internal/usecase"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -74,12 +75,12 @@ func (h *permissionRouter) listPermission() gin.HandlerFunc {
 			log  = logger.GetLogger()
 			err  error
 		)
-		err = ctx.ShouldBindJSON(&req)
-		if err != nil {
-			log.Error("list permission, error while bind json %v", err)
-			ctx.BadRequest(err)
-			return
-		}
+		// err = ctx.ShouldBindJSON(&req)
+		// if err != nil {
+		// 	log.Error("list permission, error while bind json %v", err)
+		// 	ctx.BadRequest(err)
+		// 	return
+		// }
 		resp, err = h.permissionUsecase.ListPermission(ctx, req)
 		if err != nil {
 			log.Error("list permission, error %w", err)
@@ -109,5 +110,31 @@ func (h *permissionRouter) deletePermission() gin.HandlerFunc {
 			return
 		}
 		ctx.OKResponse(nil)
+	})
+}
+
+func (h *permissionRouter) detailPermission() gin.HandlerFunc {
+	return helper.WithContext(func(ctx *helper.ContextGin) {
+		var (
+			req = dto.DetailPermissionReqDTO{}
+			// resp = []dto.Role{}
+			log = logger.GetLogger()
+			err error
+		)
+		id := ctx.Query("permission_id")
+		permsisonID, err := strconv.Atoi(id)
+		if err != nil {
+			log.Error("detail permisison, error while bind json %v", err)
+			ctx.BadRequest(err)
+			return
+		}
+		req.PermissionID = uint(permsisonID)
+		resp, err := h.permissionUsecase.DetailPermission(ctx, req)
+		if err != nil {
+			log.Error("detail role, error %w", err)
+			ctx.BadLogic(err)
+			return
+		}
+		ctx.OKResponse(resp)
 	})
 }

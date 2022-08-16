@@ -17,6 +17,7 @@ type RolePermissionService interface {
 	AddRolePermission(ctx context.Context, tx *gorm.DB, rolePer model.RolePermission) error
 	GetPermissionsByRoleIDs(ctx context.Context, roleIDs string) ([]model.Permission, error)
 	GetPermissionsByRoleID(ctx context.Context, roleID uint) ([]model.Permission, error)
+	GetRolesByPermissionID(ctx context.Context, permissionID uint) ([]model.Role, error)
 }
 
 func NewRolePermissionService(
@@ -71,4 +72,21 @@ func (r *rolePermissionService) GetPermissionsByRoleID(ctx context.Context, role
 	`
 	err = db.Raw(preSql, roleID).Find(&pers).Error
 	return pers, err
+}
+
+func (r *rolePermissionService) GetRolesByPermissionID(ctx context.Context, permissionID uint) ([]model.Role, error) {
+	var (
+		role []model.Role
+		err  error
+	)
+	db := r.gormDB
+	db = AppendSql(db, r.isDebug, GetAll)
+	preSql := `
+		select roles.id, roles.name, roles.code, roles.alias, roles.created_at, roles.updated_at,roles.description,roles.deleted_at,roles.created_by
+		from roles 
+		join role_permissions on roles.id = role_permissions.role_id
+		and role_permissions.permission_id = ? 
+	`
+	err = db.Raw(preSql, permissionID).Find(&role).Error
+	return role, err
 }
