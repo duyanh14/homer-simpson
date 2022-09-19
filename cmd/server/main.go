@@ -21,7 +21,7 @@ import (
 	"go.uber.org/zap"
 )
 
-//Server ...
+// Server ...
 type Server struct {
 	httpServer *http.Server
 	router     *gin.Engine
@@ -63,7 +63,9 @@ func (s *Server) Init(ctx context.Context) error {
 	// init database postgres
 	dbPostgres, err := db.InitPostgres(cfg.Postgres)
 	if err != nil {
-		return err
+		err = nil
+		// return err
+
 	}
 
 	// init cache redis
@@ -96,7 +98,7 @@ func (s *Server) Init(ctx context.Context) error {
 	return nil
 }
 
-//ListenHTTP ...
+// ListenHTTP ...
 func (s *Server) ListenHTTP() error {
 
 	address := fmt.Sprintf(":%d", s.cfg.HTTPAddress)
@@ -115,6 +117,9 @@ func (s *Server) Router(usecase *usecase.Usecase) error {
 		return errors.New("router user nil")
 	}
 	router := s.router.Group("v1")
+
+	healthRouter := api.NewHealthHandler()
+	healthRouter.HealthRouter(router)
 
 	router.Use(helper.AuthenticationJwt(usecase.JwtUsecase, s.cfg.IgnoreAuthen))
 	// validatorIn := validation.InitValidator()
@@ -150,6 +155,7 @@ func main() {
 		}
 	}()
 
+	///
 	ctx := context.Background()
 	ctx, cancel := context.WithCancel(ctx)
 	defer cancel()

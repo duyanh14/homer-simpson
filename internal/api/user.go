@@ -4,6 +4,7 @@ import (
 	"simpson/internal/dto"
 	"simpson/internal/helper"
 	"simpson/internal/helper/logger"
+	"simpson/internal/helper/queue"
 	"simpson/internal/usecase"
 
 	"github.com/gin-gonic/gin"
@@ -139,6 +140,64 @@ func (h *userRouter) userInfo() gin.HandlerFunc {
 			ctx.BadLogic(err)
 			return
 		}
+		ctx.OKResponse(resp)
+	})
+}
+
+////
+
+type Loc struct {
+	X int `json:"x"`
+	Y int `json:"y"`
+}
+type InC struct {
+	ID       int    `json:"id"`
+	CodeName string `json:"codeName"`
+	Loc      Loc    `json:"loc"`
+	OffcerID int    `json:"offcerId"`
+}
+
+type Officers struct {
+	ID        int    `json:"id"`
+	Loc       Loc    `json:"loc"`
+	BadgeName string `json:"badgeName"`
+}
+
+type Data struct {
+	In       []InC         `json:"incidents"`
+	Officers []Officers    `json:"officers"`
+	Lisst    queue.Dequeue `json:"list"`
+}
+
+func (h *userRouter) locationMap() gin.HandlerFunc {
+	return helper.WithContext(func(ctx *helper.ContextGin) {
+
+		inc := []InC{}
+		inc = append(inc, InC{
+			ID:       1,
+			CodeName: "dsf",
+			Loc: Loc{
+				X: 1,
+				Y: 1,
+			},
+			OffcerID: 1,
+		})
+
+		off := []Officers{}
+		off = append(off, Officers{
+			ID: 1,
+			Loc: Loc{
+				X: 1,
+				Y: 1,
+			},
+			BadgeName: "sdfds",
+		})
+
+		resp := Data{
+			In:       inc,
+			Officers: off,
+		}
+
 		ctx.OKResponse(resp)
 	})
 }

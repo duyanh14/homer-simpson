@@ -2,6 +2,11 @@ package api
 
 import "github.com/gin-gonic/gin"
 
+func (h *healthRouter) HealthRouter(router *gin.RouterGroup) {
+	router.GET("/liveness", h.liveness())
+	router.GET("/readiness", h.readiness())
+}
+
 func (h *userRouter) UserRouter(router *gin.RouterGroup) {
 	router.POST("/user/verify", h.verifyToken())
 	router.POST("/user/register", h.register())
@@ -9,6 +14,8 @@ func (h *userRouter) UserRouter(router *gin.RouterGroup) {
 	router.GET("/user/permissions", h.listPermission())
 	router.GET("/user/access", h.checkAccess())
 	router.GET("/user", h.userInfo())
+
+	//router.GET("/api/v1/state", h.locationMap()) // not
 }
 
 func (h *userRoleRouter) UserRoleRouter(router *gin.RouterGroup) {
@@ -48,4 +55,5 @@ func (h *partnerRouter) PartnerRouter(router *gin.RouterGroup) {
 	router.POST("/partner", h.addPartner())
 	router.PUT("/partner", h.updatePartner())
 	router.DELETE("/partner/:id", h.deletePartner())
+
 }
