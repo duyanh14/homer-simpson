@@ -7,6 +7,7 @@ import (
 	"log"
 	"net/http"
 	"os"
+
 	"simpson/config"
 	"simpson/internal/api"
 	"simpson/internal/helper"
@@ -18,6 +19,8 @@ import (
 
 	"github.com/gin-contrib/cors"
 	"github.com/gin-gonic/gin"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 	"go.uber.org/zap"
 )
 
@@ -117,6 +120,7 @@ func (s *Server) Router(usecase *usecase.Usecase) error {
 		return errors.New("router user nil")
 	}
 	router := s.router.Group("v1")
+	router.GET("/metrics", gin.WrapH(promhttp.Handler()))
 
 	healthRouter := api.NewHealthHandler()
 	healthRouter.HealthRouter(router)
@@ -147,6 +151,14 @@ func (s *Server) Router(usecase *usecase.Usecase) error {
 	return nil
 }
 
+var cpuTemp = prometheus.NewGauge(prometheus.GaugeOpts{
+	Name: "cpu_temperature_celsius",
+	Help: "Current temperature of the CPU.",
+})
+
+func init() {
+	prometheus.MustRegister(cpuTemp)
+}
 func main() {
 	defer func() {
 		if err := recover(); err != nil {
