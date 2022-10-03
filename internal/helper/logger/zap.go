@@ -3,12 +3,14 @@ package logger
 import (
 	"fmt"
 	"os"
+	"runtime"
 	"simpson/config"
 	"strings"
 
 	"github.com/google/uuid"
 	"go.uber.org/zap"
 	"go.uber.org/zap/zapcore"
+	"gopkg.in/natefinch/lumberjack.v2"
 )
 
 var loggerLevelMap = map[string]zapcore.Level{
@@ -45,9 +47,42 @@ type logger struct {
 
 var Logger *logger = &logger{}
 
-func configure() zapcore.WriteSyncer {
-	writers := []zapcore.WriteSyncer{os.Stderr}
-	return zapcore.NewMultiWriteSyncer(writers...)
+// func configure() zapcore.WriteSyncer {
+// 	writers := []zapcore.WriteSyncer{os.Stderr}
+// 	return zapcore.NewMultiWriteSyncer(writers...)
+// }
+
+func configure(isFile bool) zapcore.WriteSyncer {
+	if !isFile {
+		fmt.Println("ffffff")
+		writers := []zapcore.WriteSyncer{os.Stdout}
+		return zapcore.NewMultiWriteSyncer(writers...)
+	}
+	pathFolderLog := "logs"
+	fmt.Println(runtime.GOOS)
+	if strings.Contains(runtime.GOOS, "linux") {
+		pathFolderLog = pathFolderLog + "/"
+
+	} else if strings.Contains(runtime.GOOS, "darwin") {
+		pathFolderLog = pathFolderLog + "/"
+
+	} else {
+		pathFolderLog = pathFolderLog + "\\"
+	}
+
+	fileName := pathFolderLog + "logger.log"
+	w := zapcore.AddSync(&lumberjack.Logger{
+		Filename:   fileName,
+		MaxSize:    3, // megabytes
+		MaxBackups: 300,
+		MaxAge:     100, // days
+	})
+
+	return zapcore.NewMultiWriteSyncer(
+		zapcore.AddSync(os.Stdout),
+		// zapcore.AddSync(os.Stderr),
+		zapcore.AddSync(w),
+	)
 }
 
 func GetLogger() *logger {
@@ -87,7 +122,7 @@ func Newlogger(cfg config.Logger) ILogger {
 		encoder = zapcore.NewJSONEncoder(encoderCfg)
 	}
 
-	core := zapcore.NewCore(encoder, configure(), zap.NewAtomicLevelAt(logLevel))
+	core := zapcore.NewCore(encoder, configure(cfg.LogFile), zap.NewAtomicLevelAt(logLevel))
 	loggerzap := zap.New(core, zap.AddCaller(), zap.AddCallerSkip(0))
 	sugarLogger := loggerzap.Sugar()
 
@@ -156,11 +191,30 @@ func (l *logger) Infof(template string, args ...interface{}) {
 }
 
 func (l *logger) Warn(args ...interface{}) {
-	l.sugarLogger.Warn(args...)
+	if l.zapSugar {
+		l.sugarLogger.Warn(args...)
+		return
+	}
+	str := fmt.Sprintf("%s", args...)
+	fields := []zapcore.Field{
+		zap.String("UUID", l.key),
+	}
+	l.logger.Warn(str, fields...)
+	// l.sugarLogger.Warn(args...)
 }
 
 func (l *logger) Warnf(template string, args ...interface{}) {
-	l.sugarLogger.Warnf(template, args...)
+
+	if l.zapSugar {
+		str := fmt.Sprintf("UUID:%s, %s", l.key, template)
+		l.sugarLogger.Warnf(str, args...)
+		return
+	}
+	fields := []zapcore.Field{
+		zap.String("UUID", l.key),
+	}
+	l.logger.Warn(fmt.Sprintf(template, args...), fields...)
+	// l.sugarLogger.Warnf(template, args...)
 }
 
 func (l *logger) Error(args ...interface{}) {

@@ -3,6 +3,7 @@ package db
 import (
 	"fmt"
 	"simpson/config"
+	"simpson/internal/helper/logger"
 	"simpson/sql/migration"
 
 	"go.uber.org/zap"
@@ -16,7 +17,7 @@ func InitPostgres(config config.Postgres) (*gorm.DB, error) {
 	if err != nil {
 		return db, err
 	}
-	zap.S().Debug("connect to postgress successful")
+	logger.GetLogger().Debug("connect to postgress successful")
 	if config.Migrate {
 		Migration(db)
 	}

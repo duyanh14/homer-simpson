@@ -97,7 +97,7 @@ func (s *Server) Init(ctx context.Context) error {
 	if err != nil {
 		return err
 	}
-	zap.L().Info("start server ok")
+	logger.GetLogger().Info("start server ok")
 	return nil
 }
 
